@@ -1,4 +1,13 @@
 apply plugin: 'com.android.application'
+apply plugin: 'jiagu'
+
+jiagu {
+    debug true
+    enable true
+    jiaGuDir "D:\\file\\360jiagubao_windows_64\\jiagu"
+    username "huangbo@jadegold.cn"
+    password "Swhj112123321"
+}
 
 android {
     compileSdkVersion 28
@@ -10,9 +19,23 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
+    signingConfigs {
+        release {
+            storeFile file('jiagu.jks')
+            storePassword "123456"
+            keyAlias "jiagu"
+            keyPassword "123456"
+        }
+    }
     buildTypes {
         release {
             minifyEnabled false
+            signingConfig signingConfigs.release
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            minifyEnabled false
+            signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
