@@ -1,4 +1,4 @@
-# JiaguPlugin ![](https://img.shields.io/bintray/v/shuaijianwen/android/jiaguplugin.svg)
+# JiaguPlugin [![](https://img.shields.io/bintray/v/shuaijianwen/android/jiaguplugin.svg)](https://jcenter.bintray.com/com/s/android/plugin/jiaguplugin/)
 
 ### Description
 
