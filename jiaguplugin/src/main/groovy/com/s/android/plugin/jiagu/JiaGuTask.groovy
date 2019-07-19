@@ -149,7 +149,7 @@ class JiaGuTask extends DefaultTask {
                 if (indexOf > -1) {
                     result = result.substring(indexOf).trim()
                 } else {
-                    reslut = "已选增强服务：${jiaGuPluginExtension.config}"
+                    result = "已选增强服务：${jiaGuPluginExtension.config}"
                 }
             }
             Logger.debug(result)
