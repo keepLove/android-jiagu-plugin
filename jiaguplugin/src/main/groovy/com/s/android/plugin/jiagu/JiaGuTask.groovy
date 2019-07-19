@@ -144,7 +144,15 @@ class JiaGuTask extends DefaultTask {
             Logger.debug(importMulPkg())
             // 配置加固服务
             result = setConfig()
-            Logger.debug(result.substring(result.indexOf("已选增强服务")).trim())
+            if (result.contains("config saving succeed.")) {
+                def indexOf = result.indexOf("已选增强服务")
+                if (indexOf > -1) {
+                    result = result.substring(indexOf).trim()
+                } else {
+                    reslut = "已选增强服务：${jiaGuPluginExtension.config}"
+                }
+            }
+            Logger.debug(result)
             Logger.debug("加固中........")
             // 加固
             result = jiaguStart()
