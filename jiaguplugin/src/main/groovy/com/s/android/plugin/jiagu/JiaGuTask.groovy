@@ -61,7 +61,7 @@ class JiaGuTask extends DefaultTask {
      * 配置加固服务
      */
     private String setConfig() {
-        if (jiaGuPluginExtension.config == null || jiaGuPluginExtension.config.length == 0) {
+        if (jiaGuPluginExtension.config == null || jiaGuPluginExtension.config.isEmpty()) {
             // 选择崩溃日志服务、支持x86架构设备、选择数据分析服务
             jiaGuPluginExtension.config = "-crashlog -x86 -analyse"
         }
@@ -110,6 +110,15 @@ class JiaGuTask extends DefaultTask {
         if (!jiaGuPluginExtension.enable) {
             Logger.debug("enable: false")
             return
+        }
+        if (jiaGuPluginExtension.jiaGuDir == null || jiaGuPluginExtension.jiaGuDir.isEmpty()) {
+            throw new NullPointerException("jiaGuDir 必填")
+        }
+        if (jiaGuPluginExtension.username == null || jiaGuPluginExtension.username.isEmpty()) {
+            throw new NullPointerException("username 必填")
+        }
+        if (jiaGuPluginExtension.password == null || jiaGuPluginExtension.password.isEmpty()) {
+            throw new NullPointerException("password 必填")
         }
         def jiaguDirFile = new File(jiaGuPluginExtension.jiaGuDir)
         if (jiaguDirFile == null || !jiaguDirFile.exists()) {
