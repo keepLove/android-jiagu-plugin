@@ -1,5 +1,6 @@
 apply plugin: 'groovy'
 apply plugin: 'maven'
+apply plugin: 'com.novoda.bintray-release'
 
 dependencies {
     compile gradleApi()
@@ -15,10 +16,26 @@ uploadArchives {
         mavenDeployer {
             //设置插件的GAV参数
             pom.groupId = 'com.s.android.plugin'
-            pom.artifactId = 'jiagu'
+            pom.artifactId = 'jiaguplugin'
             pom.version = '1.0.0'
             //文件发布到下面目录
             repository(url: uri('../repo'))
         }
     }
+}
+
+// https://github.com/novoda/bintray-release
+// https://github.com/HailouWang/bintray-release/wiki/%E9%85%8D%E7%BD%AEpublish%E9%97%AD%E5%8C%85
+
+// $ ./gradlew clean build bintrayUpload -PbintrayUser=BINTRAY_USERNAME -PbintrayKey=BINTRAY_KEY -PdryRun=false
+// bintrayUser: 用于上传的用户名。bintrayKey: 用户帐户的bintray API密钥。
+// dryRun: 如果设置为“true”，则将运行所有内容，但不会将包上传到bintray。 如果“false”，那么它将正常上传。
+publish {
+    userOrg = 'shuaijianwen'
+    repoName = 'android'
+    groupId = 'com.s.android.plugin'
+    artifactId = 'jiaguplugin'
+    publishVersion = '1.0.0'
+    desc = 'Gradle plugin of 360 jiagu '
+    website = 'https://github.com/keepLove/JiaguPlugin'
 }

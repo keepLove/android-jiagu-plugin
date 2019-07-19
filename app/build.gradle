@@ -2,9 +2,10 @@ apply plugin: 'com.android.application'
 apply plugin: 'jiagu'
 
 jiagu {
-    jiaGuDir "D:\\file\\360jiagubao_windows_64\\jiagu"
-    username "huangbo@jadegold.cn"
-    password "Swhj112123321"
+    jiaGuDir = "D:\\file\\360jiagubao_windows_64\\jiagu"
+    username = "huangbo@jadegold.cn"
+    password = "Swhj112123321"
+    enable = true
 }
 
 android {
@@ -27,12 +28,16 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled false
+            shrinkResources true
+            minifyEnabled true
+            zipAlignEnabled true
             signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
-            minifyEnabled false
+            shrinkResources true
+            minifyEnabled true
+            zipAlignEnabled true
             signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
