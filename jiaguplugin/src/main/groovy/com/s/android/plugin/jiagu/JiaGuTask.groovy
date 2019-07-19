@@ -106,20 +106,28 @@ class JiaGuTask extends DefaultTask {
     @TaskAction
     void start() {
         jiaGuPluginExtension = project.extensions.findByName(JiaGuPlugin.EXTENSION_NAME) as JiaGuPluginExtension
-        commandJiaGu = "${jiaGuPluginExtension.jiaGuDir}\\java\\bin\\java -jar ${jiaGuPluginExtension.jiaGuDir}\\jiagu.jar "
         debug = jiaGuPluginExtension.debug
         if (!jiaGuPluginExtension.enable) {
             Logger.debug("enable: false")
             return
         }
+        def jiaguDirFile = new File(jiaGuPluginExtension.jiaGuDir)
+        if (jiaguDirFile == null || !jiaguDirFile.exists()) {
+            throw new NullPointerException("jiaGuDir 不存在")
+        }
+        def jiaguJarFile = new File("${jiaGuPluginExtension.jiaGuDir}\\jiagu.jar")
+        if (jiaguJarFile == null || !jiaguJarFile.exists()) {
+            throw new NullPointerException("jiagu.jar 不存在")
+        }
+        commandJiaGu = "${jiaGuPluginExtension.jiaGuDir}\\java\\bin\\java -jar ${jiaGuPluginExtension.jiaGuDir}\\jiagu.jar "
         Logger.debug("-----start-----")
         // 登录
         String result = login()
-        if (result.concat("success")) {
+        if (result.contains("success")) {
             Logger.debug("login success")
             // 导入签名keystore信息
             result = importSign()
-            if (result.concat("succeed")) {
+            if (result.contains("succeed")) {
                 result = "导入签名 succeed"
             }
             Logger.debug(result)
@@ -131,12 +139,13 @@ class JiaGuTask extends DefaultTask {
             Logger.debug("加固中........")
             // 加固
             result = jiaguStart()
-            if (result.concat("任务完成_已签名")) {
+            if (result.contains("任务完成_已签名")) {
                 result = "任务完成_已签名"
             }
             Logger.debug(result)
         } else {
             Logger.debug(result)
+            throw new RuntimeException("登录失败")
         }
         Logger.debug("-----end-----")
     }
