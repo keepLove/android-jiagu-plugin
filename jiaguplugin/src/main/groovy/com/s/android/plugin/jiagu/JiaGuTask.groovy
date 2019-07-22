@@ -160,6 +160,7 @@ class JiaGuTask extends DefaultTask {
                 result = "任务完成_已签名"
             }
             Logger.debug(result)
+            Logger.debug("输出目录：${jiaGuPluginExtension.outputFileDir}")
         } else {
             Logger.debug(result)
             throw new RuntimeException("登录失败")
@@ -184,14 +185,12 @@ class JiaGuTask extends DefaultTask {
                 Logger.debug(command)
             }
             Process pro = runTime.exec(command)
-            BufferedReader input = new BufferedReader(new InputStreamReader(pro.getInputStream()))
-            PrintWriter output = new PrintWriter(new OutputStreamWriter(pro.getOutputStream()))
+            BufferedReader input = new BufferedReader(new InputStreamReader(pro.getInputStream(), "GBK"))
             String line
             while ((line = input.readLine()) != null) {
                 returnString = returnString + line + "\n"
             }
             input.close()
-            output.close()
             pro.destroy()
         } catch (IOException ex) {
             ex.printStackTrace()
