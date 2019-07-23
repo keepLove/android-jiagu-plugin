@@ -17,7 +17,7 @@ uploadArchives {
             //设置插件的GAV参数
             pom.groupId = 'com.s.android.plugin'
             pom.artifactId = 'jiaguplugin'
-            pom.version = '1.1.0'
+            pom.version = '1.1.1'
             //文件发布到下面目录
             repository(url: uri('../repo'))
         }
@@ -35,7 +35,7 @@ publish {
     repoName = 'android'
     groupId = 'com.s.android.plugin'
     artifactId = 'jiaguplugin'
-    publishVersion = '1.1.0'
+    publishVersion = '1.1.1'
     desc = 'Gradle plugin of 360 jiagu '
     website = 'https://github.com/keepLove/JiaguPlugin'
 }

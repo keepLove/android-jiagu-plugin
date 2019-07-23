@@ -6,7 +6,7 @@ jiagu {
     username = "huangbo@jadegold.cn"
     password = "Swhj112123321"
     enable = true
-    debug = true
+    debug = false
 }
 
 android {
@@ -41,15 +41,6 @@ android {
             zipAlignEnabled true
             signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
-    }
-    flavorDimensions 'test'
-    productFlavors {
-        local {
-            dimension = 'test'
-        }
-        pro {
-            dimension = 'test'
         }
     }
 }
