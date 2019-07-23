@@ -2,7 +2,7 @@
 
 ### Description
 
-360加固Gradle插件，当执行assembleRelease时自动进行apk加固，debug时不会执行
+360加固Gradle插件，当执行assemble${variantName}时自动进行apk加固
 
 首先需要下载[360加固助手](http://jiagu.360.cn/#/global/download)
 
@@ -40,7 +40,7 @@ jiagu {
 
 |       属性        |	    类型    |                          默认值                           |                    说 明                    |
 |:-----------------:|:-------------:|:---------------------------------------------------------:|:---------------------------:|
-|    debug          |    boolean    |     false                                                 |    调试模式开关，会打印更多log        |
+|    debug          |    boolean    |     false                                                 |    调试模式开关，会打印更多log，自动加固        |
 |    enable         |    boolean    |     true                                                  |    插件开关                   |
 |    jiaGuDir       |    String     |     null                                                  |    360加固助手安装地址\jiagu 类似D:\360jiagubao_windows_64\jiagu         |
 |    username       |    String     |     null                                                  |    360加固助手登录用户名                   |
@@ -93,6 +93,7 @@ android {
 
 **说明**
 
-- 插件只会在Release编译打包的时候自动加固，Debug编译打包不会执行
+- 插件会在执行assemble${variantName}前生成sJiaGu${variantName}方法
+- 插件会在Release编译打包的时候自动加固，测试模式时Debug编译打包也会执行
 
 

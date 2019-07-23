@@ -5,7 +5,7 @@ import org.gradle.api.tasks.TaskAction
 
 class JiaGuTask extends DefaultTask {
 
-    static final String NAME = "sjiaGuRelease"
+    static final String NAME = "sJiaGu"
 
     private String commandJiaGu
     private String commandExt = ""
@@ -75,10 +75,11 @@ class JiaGuTask extends DefaultTask {
     private String jiaguStart() {
         if (jiaGuPluginExtension.inputFilePath == null || jiaGuPluginExtension.inputFilePath.isEmpty()) {
             String outputFilePath = ""
+            String taskName = getName()
             try {
                 project.android.applicationVariants.all { variant ->
                     variant.outputs.all { output ->
-                        if (variant.buildType.name == "release") {
+                        if (taskName.contains(variant.name.capitalize())) {
                             outputFilePath = output.outputFile.getAbsolutePath()
                         }
                     }
