@@ -6,6 +6,12 @@ class JiaGuPluginExtension {
 
     boolean debug = false // 调试模式开关
     boolean enable = true // 插件开关
+    boolean jiaguEnable = true // 是否加固
+    boolean firEnable = false // 是否上传至fir
+    String firBundleId = null // 默认获取applicationId
+    String firApiToken = null // fir api token  必填
+    String appName = null // App Name
+    String firChangeLog = null // 更新日志
     String jiaGuDir = null //加固文件地址 必填
     String username = null //用户名 必填
     String password = null//密码 必填
