@@ -5,14 +5,18 @@ import com.google.gson.JsonParser
 import com.s.android.plugin.jiagu.JiaGuTask
 import com.s.android.plugin.jiagu.Logger
 import com.s.android.plugin.jiagu.entity.FirUploadEntity
-import net.dongliu.apk.parser.bean.ApkMeta
+import net.dongliu.apk.parser.ApkFile
+import net.dongliu.apk.parser.bean.Icon
+import net.dongliu.apk.parser.bean.IconFace
 import okhttp3.*
 import org.gradle.api.Project
+
+import java.util.function.Consumer
 
 class FirUploadUtils {
 
     private OkHttpClient okHttpClient = new OkHttpClient()
-    private ApkMeta mApkMeta
+    private ApkFile mApkFile
 
     /**
      * firUpload
@@ -65,9 +69,9 @@ class FirUploadUtils {
             }
         }
         project.jiagu.fir.apkFile = uploadFile
-        mApkMeta = AnalysisApk.getAppInfo(uploadFile)
+        mApkFile = new ApkFile(uploadFile)
         if (mFirUploadEntity.appName == null || mFirUploadEntity.appName.isEmpty()) {
-            project.jiagu.fir.appName = mApkMeta.getName()
+            project.jiagu.fir.appName = mApkFile.apkMeta.label
         }
         obtainCredentials(project, firApiToken, firBundleId)
     }
@@ -157,7 +161,40 @@ class FirUploadUtils {
      * 上传icon
      */
     private void firUploadIcon(Project project, String url, String key, String token) {
-        FirUploadEntity mFirUploadEntity = project.jiagu.fir
-        Logger.debug("upload icon. ${mApkMeta.getIcon()}")
+        Icon icon = null
+        mApkFile.getAllIcons().forEach(new Consumer<IconFace>() {
+            @Override
+            void accept(IconFace iconFace) {
+                if (iconFace.file && iconFace instanceof Icon) {
+                    icon = iconFace
+                }
+            }
+        })
+        Logger.debug("fir upload icon. ${icon.path}")
+        if (project.jiagu.debug) {
+            Logger.debug(icon.toString() + "\nurl:$url\nkey:${key}\ntoken:$token")
+        }
+        MultipartBody.Builder bodybuilder = new MultipartBody.Builder()
+        bodybuilder.setType(MultipartBody.FORM)
+        bodybuilder.addFormDataPart("key", key)
+        bodybuilder.addFormDataPart("token", token)
+        bodybuilder.addFormDataPart("file", icon.getPath(), RequestBody.create(null, icon.getData()))
+        Request.Builder builder = new Request.Builder()
+                .url(url)
+                .post(bodybuilder.build())
+        Response response = okHttpClient.newCall(builder.build()).execute()
+        if (response != null && response.body() != null && response.code() == 200) {
+            def string = response.body().string()
+            if (project.jiagu.debug) {
+                Logger.debug(string)
+            }
+            def jsonObject = new JsonParser().parse(string).asJsonObject
+            boolean isCompleted = jsonObject.get("is_completed").asBoolean
+            String download_url = jsonObject.get("download_url").asString
+            Logger.debug("is_completed : $isCompleted")
+            Logger.debug("download_url : $download_url")
+        } else {
+            Logger.debug("upload icon failure. $response")
+        }
     }
 }
