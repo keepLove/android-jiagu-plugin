@@ -1,4 +1,4 @@
-# JiaguPlugin [![](https://img.shields.io/bintray/v/shuaijianwen/android/jiaguplugin.svg)](https://jcenter.bintray.com/com/s/android/plugin/jiaguplugin/) [ ![Download](https://api.bintray.com/packages/shuaijianwen/android/jiaguplugin/images/download.svg?version=1.1.1) ](https://bintray.com/shuaijianwen/android/jiaguplugin/1.1.1/link)
+# JiaguPlugin [![](https://img.shields.io/bintray/v/shuaijianwen/android/jiaguplugin.svg)](https://jcenter.bintray.com/com/s/android/plugin/jiaguplugin/) [ ![Download](https://api.bintray.com/packages/shuaijianwen/android/jiaguplugin/images/download.svg?version=1.2.0) ](https://bintray.com/shuaijianwen/android/jiaguplugin/1.2.0/link)
 
 ### Description
 
@@ -32,9 +32,15 @@ jiagu {
     jiaGuDir = ""
     username = ""
     password = ""
+    fir {
+        firApiToken = ""
+        firChangeLog = ""
+    }
 }
 ```
 **其中jiaGuDir、username和password是必填的。**
+
+**如果firEnable为true，firApiToken必填**
 
 还可以设置其他属性，属性列表如下：
 
@@ -42,6 +48,8 @@ jiagu {
 |:-----------------:|:-------------:|:---------------------------------------------------------:|:---------------------------:|
 |    debug          |    boolean    |     false                                                 |    调试模式开关，会打印更多log，自动加固        |
 |    enable         |    boolean    |     true                                                  |    插件开关                   |
+|    jiaguEnable    |    boolean    |     true                                                  |    加固开关                   |
+|    firEnable      |    boolean    |     false                                                 |    fir上传开关                   |
 |    jiaGuDir       |    String     |     null                                                  |    360加固助手安装地址\jiagu 类似D:\360jiagubao_windows_64\jiagu         |
 |    username       |    String     |     null                                                  |    360加固助手登录用户名                   |
 |    password       |    String     |     null                                                  |    360加固助手登录密码                    |
@@ -53,6 +61,8 @@ jiagu {
 |    inputFilePath  |    String     |     applicationVariants.outputs.outputFile                |    打包的apk路径   |
 |    outputFileDir  |    String     |     ${project.buildDir.getAbsolutePath()}\jiagu           |    加固后apk的输出路径，app\build\jiagu   |
 |    config         |    String     |     -crashlog -x86 -analyse                               |    加固配置，默认选择崩溃日志服务、支持x86架构设备、选择数据分析服务   |
+|    firApiToken    |    String     |     fir API Token                                         |    鼠标悬浮头像，出现API Token 按钮，点击   |
+|    firChangeLog   |    String     |     null                                                  |    更新说明   |
 
 **签名**
 
