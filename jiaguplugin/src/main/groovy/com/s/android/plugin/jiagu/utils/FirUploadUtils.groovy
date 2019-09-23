@@ -5,24 +5,23 @@ import com.google.gson.JsonParser
 import com.s.android.plugin.jiagu.JiaGuTask
 import com.s.android.plugin.jiagu.Logger
 import com.s.android.plugin.jiagu.entity.FirUploadEntity
+import net.dongliu.apk.parser.bean.ApkMeta
 import okhttp3.*
 import org.gradle.api.Project
 
 class FirUploadUtils {
 
-    private static OkHttpClient okHttpClient = new OkHttpClient()
+    private OkHttpClient okHttpClient = new OkHttpClient()
+    private ApkMeta mApkMeta
 
     /**
      * firUpload
      */
-    static void firUpload(Project project) {
+    void firUpload(Project project) {
         FirUploadEntity mFirUploadEntity = project.jiagu.fir
         String firApiToken = mFirUploadEntity.firApiToken
         if (firApiToken == null || firApiToken.isEmpty()) {
             throw new NullPointerException("firApiToken can not be null.")
-        }
-        if (mFirUploadEntity.appName == null || mFirUploadEntity.appName.isEmpty()) {
-            throw new NullPointerException("App Name can not be null.")
         }
         String firBundleId = mFirUploadEntity.firBundleId
         if (firBundleId == null || firBundleId.isEmpty()) {
@@ -31,6 +30,52 @@ class FirUploadUtils {
         if (firBundleId == null || firBundleId.isEmpty()) {
             throw new NullPointerException("firBundleId can not be null.")
         }
+        File uploadFile = mFirUploadEntity.apkFile
+        try {
+            project.android.applicationVariants.all { variant ->
+                variant.outputs.all { output ->
+                    if (project.tasks.findByName("${JiaGuTask.NAME + variant.name.capitalize()}") != null) {
+                        if (mFirUploadEntity.versionCode == null) {
+                            mFirUploadEntity.versionCode = variant.versionCode
+                            project.jiagu.fir.versionCode = variant.versionCode
+                        }
+                        if (mFirUploadEntity.versionName == null) {
+                            mFirUploadEntity.versionName = variant.versionName
+                            project.jiagu.fir.versionName = variant.versionName
+                        }
+                        if (uploadFile == null || !uploadFile.exists()) {
+                            uploadFile = output.outputFile
+                        }
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace()
+        }
+        if (uploadFile == null || !uploadFile.exists()) {
+            Logger.debug("not apk file.")
+            return
+        }
+        if (project.jiagu.jiaguEnable) {
+            String name = uploadFile.name.substring(0, uploadFile.name.lastIndexOf(".")) +
+                    "_" + mFirUploadEntity.versionName.replace(".", "") + "_jiagu_sign.apk"
+            File file = new File(project.jiagu.outputFileDir + "\\" + name)
+            if (file.exists()) {
+                uploadFile = file
+            }
+        }
+        project.jiagu.fir.apkFile = uploadFile
+        mApkMeta = AnalysisApk.getAppInfo(uploadFile)
+        if (mFirUploadEntity.appName == null || mFirUploadEntity.appName.isEmpty()) {
+            project.jiagu.fir.appName = mApkMeta.getName()
+        }
+        obtainCredentials(project, firApiToken, firBundleId)
+    }
+
+    /**
+     * 获取上传凭证
+     */
+    private void obtainCredentials(Project project, String firApiToken, String firBundleId) {
         Logger.debug("obtain upload credentials...")
         FormBody.Builder formBodyBuild = new FormBody.Builder()
         formBodyBuild.add("type", "android")
@@ -48,8 +93,11 @@ class FirUploadUtils {
             Logger.debug("obtain upload credentials:success")
             JsonObject jsonObject = new JsonParser().parse(string).asJsonObject.getAsJsonObject("cert")
             def binaryObject = jsonObject.getAsJsonObject("binary")
+            def iconObject = jsonObject.getAsJsonObject("icon")
             firUploadApk(project, binaryObject.get("upload_url").asString, binaryObject.get("key").asString,
                     binaryObject.get("token").asString, jsonObject.get("prefix").asString)
+            firUploadIcon(project, iconObject.get("upload_url").asString, iconObject.get("key").asString,
+                    iconObject.get("token").asString)
         } else {
             Logger.debug("Unable to obtain upload credentials. $response")
         }
@@ -58,36 +106,11 @@ class FirUploadUtils {
     /**
      * 上传apk
      */
-    private static void firUploadApk(Project project, String url, String key, String token, String prefix) {
+    private void firUploadApk(Project project, String url, String key, String token, String prefix) {
         FirUploadEntity mFirUploadEntity = project.jiagu.fir
-        String versionCode = null
-        String versionName = null
-        File uploadFile = null
-        try {
-            project.android.applicationVariants.all { variant ->
-                variant.outputs.all { output ->
-                    if (project.tasks.findByName("${JiaGuTask.NAME + variant.name.capitalize()}") != null) {
-                        versionCode = variant.versionCode
-                        versionName = variant.versionName
-                        uploadFile = output.outputFile
-                    }
-                }
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace()
-        }
-        if (uploadFile == null || !uploadFile.exists()) {
-            Logger.debug("not apk file.")
-            return
-        }
-        if (project.jiagu.jiaguEnable) {
-            String name = uploadFile.name.substring(0, uploadFile.name.lastIndexOf(".")) +
-                    "_" + versionName.replace(".", "") + "_jiagu_sign.apk"
-            File file = new File(project.jiagu.outputFileDir + "\\" + name)
-            if (file.exists()) {
-                uploadFile = file
-            }
-        }
+        String versionCode = mFirUploadEntity.versionCode
+        String versionName = mFirUploadEntity.versionName
+        File uploadFile = mFirUploadEntity.apkFile
         Logger.debug("fir upload apk. ${uploadFile.path}")
         if (project.jiagu.debug) {
             Logger.debug("path: ${uploadFile.path}  " +
@@ -130,4 +153,11 @@ class FirUploadUtils {
         }
     }
 
+    /**
+     * 上传icon
+     */
+    private void firUploadIcon(Project project, String url, String key, String token) {
+        FirUploadEntity mFirUploadEntity = project.jiagu.fir
+        Logger.debug("upload icon. ${mApkMeta.getIcon()}")
+    }
 }

@@ -6,6 +6,9 @@ class FirUploadEntity {
     String firApiToken = null // fir api token  必填
     String appName = null // App Name
     String firChangeLog = null // 更新日志
+    File apkFile = null // apk fill
+    String versionCode = null
+    String versionName = null
 
     @Override
     String toString() {

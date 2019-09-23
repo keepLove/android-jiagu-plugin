@@ -118,7 +118,8 @@ class JiaGuTask extends DefaultTask {
         }
         if (jiaGuPluginExtension.firEnable) {
             Logger.debug("-----start----- fir upload")
-            FirUploadUtils.firUpload(project)
+            FirUploadUtils firUploadUtils = new FirUploadUtils()
+            firUploadUtils.firUpload(project)
             Logger.debug("------end------ fir upload")
         }
     }
