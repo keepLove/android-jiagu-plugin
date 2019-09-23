@@ -9,9 +9,12 @@ jiagu {
     debug = false
     jiaguEnable = true
     firEnable = true
-    firApiToken = "5f238a7d121e9c775c32958cb1f9a2a1"
-    appName = "Jiagu Plugin"
-    firChangeLog = "测试更新"
+
+    fir {
+        firApiToken = "5f238a7d121e9c775c32958cb1f9a2a1"
+        appName = "Jiagu Plugin"
+        firChangeLog = "测试更新"
+    }
 }
 
 android {

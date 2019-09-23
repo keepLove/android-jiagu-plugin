@@ -1,8 +1,7 @@
 package com.s.android.plugin.jiagu
 
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
-import okhttp3.*
+import com.s.android.plugin.jiagu.utils.FirUploadUtils
+import com.s.android.plugin.jiagu.utils.ProcessUtils
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
@@ -13,8 +12,6 @@ class JiaGuTask extends DefaultTask {
     private String commandJiaGu
     private String commandExt = ""
     private JiaGuPluginExtension jiaGuPluginExtension
-    private static boolean debug = false
-    private OkHttpClient okHttpClient = new OkHttpClient()
 
     JiaGuTask() {
         group = "JiaGu"
@@ -25,7 +22,7 @@ class JiaGuTask extends DefaultTask {
      * 加固登录
      */
     private String login() {
-        return exec(commandJiaGu + " -login ${jiaGuPluginExtension.username} ${jiaGuPluginExtension.password}")
+        return ProcessUtils.exec(commandJiaGu + " -login ${jiaGuPluginExtension.username} ${jiaGuPluginExtension.password}")
     }
 
     /**
@@ -44,7 +41,7 @@ class JiaGuTask extends DefaultTask {
         }
         if (jiaGuPluginExtension.storeFile != null && jiaGuPluginExtension.storeFile.exists()) {
             commandExt += " -autosign "
-            return exec(commandJiaGu + " -importsign ${jiaGuPluginExtension.storeFile.getAbsolutePath()}" +
+            return ProcessUtils.exec(commandJiaGu + " -importsign ${jiaGuPluginExtension.storeFile.getAbsolutePath()}" +
                     " ${jiaGuPluginExtension.storePassword}  ${jiaGuPluginExtension.keyAlias}  ${jiaGuPluginExtension.keyPassword}")
         }
         return "未导入签名信息"
@@ -56,7 +53,7 @@ class JiaGuTask extends DefaultTask {
     private String importMulPkg() {
         if (jiaGuPluginExtension.channelFile != null && jiaGuPluginExtension.channelFile.exists()) {
             commandExt += " -automulpkg "
-            return exec(commandJiaGu + " -importmulpkg ${jiaGuPluginExtension.channelFile}")
+            return ProcessUtils.exec(commandJiaGu + " -importmulpkg ${jiaGuPluginExtension.channelFile}")
         }
         return "未导入渠道信息"
     }
@@ -70,7 +67,7 @@ class JiaGuTask extends DefaultTask {
             jiaGuPluginExtension.config = "-crashlog -x86 -analyse"
         }
         // 配置加固服务
-        return exec(commandJiaGu + " -config ${jiaGuPluginExtension.config}")
+        return ProcessUtils.exec(commandJiaGu + " -config ${jiaGuPluginExtension.config}")
     }
 
     /**
@@ -102,7 +99,7 @@ class JiaGuTask extends DefaultTask {
         }
         // 应用加固
         String cmd = commandJiaGu + " -jiagu ${jiaGuPluginExtension.inputFilePath} ${jiaGuPluginExtension.outputFileDir}"
-        return exec(cmd + commandExt)
+        return ProcessUtils.exec(cmd + commandExt)
     }
 
     /**
@@ -111,16 +108,18 @@ class JiaGuTask extends DefaultTask {
     @TaskAction
     void start() {
         jiaGuPluginExtension = project.extensions.findByName(JiaGuPlugin.EXTENSION_NAME) as JiaGuPluginExtension
-        debug = jiaGuPluginExtension.debug
         if (!jiaGuPluginExtension.enable) {
             Logger.debug("enable: false")
             return
         }
+        ProcessUtils.debug = jiaGuPluginExtension.debug
         if (jiaGuPluginExtension.jiaguEnable) {
             startJiagu()
         }
         if (jiaGuPluginExtension.firEnable) {
-            firUpload()
+            Logger.debug("-----start----- fir upload")
+            FirUploadUtils.firUpload(project)
+            Logger.debug("------end------ fir upload")
         }
     }
 
@@ -185,140 +184,4 @@ class JiaGuTask extends DefaultTask {
         Logger.debug("-----end-----")
     }
 
-    /**
-     * firUpload
-     */
-    void firUpload() {
-        String firApiToken = jiaGuPluginExtension.firApiToken
-        if (firApiToken == null || firApiToken.isEmpty()) {
-            throw new NullPointerException("firApiToken can not be null.")
-        }
-        if (jiaGuPluginExtension.appName == null || jiaGuPluginExtension.appName.isEmpty()) {
-            throw new NullPointerException("App Name can not be null.")
-        }
-        String firBundleId = jiaGuPluginExtension.firBundleId
-        if (firBundleId == null || firBundleId.isEmpty()) {
-            firBundleId = project.android.defaultConfig.applicationId
-        }
-        if (firBundleId == null || firBundleId.isEmpty()) {
-            throw new NullPointerException("firBundleId can not be null.")
-        }
-        Logger.debug("obtain upload credentials...")
-        FormBody.Builder formBodyBuild = new FormBody.Builder()
-        formBodyBuild.add("type", "android")
-        formBodyBuild.add("bundle_id", firBundleId)
-        formBodyBuild.add("api_token", firApiToken)
-        Request.Builder builder = new Request.Builder()
-                .url("http://api.fir.im/apps")
-                .post(formBodyBuild.build())
-        Response response = okHttpClient.newCall(builder.build()).execute()
-        if (response != null && response.code() == 201) {
-            def string = response.body().string()
-            Logger.debug(string)
-            JsonObject jsonObject = new JsonParser().parse(string).asJsonObject.getAsJsonObject("cert")
-            def binaryObject = jsonObject.getAsJsonObject("binary")
-            firUploadApk(binaryObject.get("upload_url").asString, binaryObject.get("key").asString,
-                    binaryObject.get("token").asString, jsonObject.get("prefix").asString)
-        } else {
-            Logger.debug("Unable to obtain upload credentials. $response")
-        }
-    }
-
-    /**
-     * 上传apk
-     */
-    void firUploadApk(String url, String key, String token, String prefix) {
-        String taskName = getName()
-        String versionCode = null
-        String versionName = null
-        File uploadFile = null
-        try {
-            project.android.applicationVariants.all { variant ->
-                variant.outputs.all { output ->
-                    if (taskName.contains(variant.name.capitalize())) {
-                        versionCode = variant.versionCode
-                        versionName = variant.versionName
-                        uploadFile = output.outputFile
-                    }
-                }
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace()
-        }
-        if (uploadFile == null || !uploadFile.exists()) {
-            Logger.debug("not apk file.")
-            return
-        }
-        if (jiaGuPluginExtension.jiaguEnable) {
-            String name = uploadFile.name.substring(0, uploadFile.name.lastIndexOf(".")) +
-                    "_" + versionName.replace(".", "") + "_jiagu_sign.apk"
-            File file = new File(jiaGuPluginExtension.outputFileDir + "\\" + name)
-            if (file.exists()) {
-                uploadFile = file
-            }
-        }
-        Logger.debug("upload apk. path: ${uploadFile.path}  " +
-                "\nurl:$url" +
-                "\nkey:$key" +
-                "\ntoken:$token" +
-                "\n" + "${prefix}name:" + jiaGuPluginExtension.appName +
-                "\n" + "${prefix}version:" + versionCode +
-                "\n" + "${prefix}build:" + versionName +
-                "\n" + "${prefix}changelog:" + jiaGuPluginExtension.firChangeLog
-        )
-        MultipartBody.Builder bodybuilder = new MultipartBody.Builder()
-        bodybuilder.setType(MultipartBody.FORM)
-        bodybuilder.addFormDataPart("key", key)
-        bodybuilder.addFormDataPart("token", token)
-        bodybuilder.addFormDataPart("file", uploadFile.getName(), RequestBody.create(null, uploadFile))
-        bodybuilder.addFormDataPart("${prefix}name", jiaGuPluginExtension.appName)
-        bodybuilder.addFormDataPart("${prefix}version", versionCode)
-        bodybuilder.addFormDataPart("${prefix}build", versionName)
-        bodybuilder.addFormDataPart("${prefix}changelog", jiaGuPluginExtension.firChangeLog)
-        Request.Builder builder = new Request.Builder()
-                .url(url)
-                .post(bodybuilder.build())
-        Response response = okHttpClient.newCall(builder.build()).execute()
-        if (response != null && response.body() != null && response.code() == 200) {
-            def string = response.body().string()
-            Logger.debug(string)
-            boolean isCompleted = new JsonParser().parse(string).asJsonObject.get("is_completed").asBoolean
-            Logger.debug("is_completed : $isCompleted")
-        } else {
-            Logger.debug("upload apk failure. $response")
-        }
-    }
-
-    /**
-     * 执行命令行
-     *
-     * @param command 命令
-     * @return 结果
-     */
-    static String exec(String command) throws InterruptedException {
-        String returnString = ""
-        Runtime runTime = Runtime.getRuntime()
-        if (runTime == null) {
-            Logger.debug("Create runtime failure!")
-        }
-        try {
-            if (debug) {
-                Logger.debug(command)
-            }
-            Process pro = runTime.exec(command)
-            BufferedReader input = new BufferedReader(new InputStreamReader(pro.getInputStream(), "GBK"))
-            String line
-            while ((line = input.readLine()) != null) {
-                returnString = returnString + line + "\n"
-            }
-            input.close()
-            pro.destroy()
-        } catch (IOException ex) {
-            ex.printStackTrace()
-        }
-        if (debug) {
-            Logger.debug(returnString)
-        }
-        return returnString
-    }
 }
