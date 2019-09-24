@@ -15,8 +15,20 @@ import java.util.function.Consumer
 
 class FirUploadUtils {
 
-    private OkHttpClient okHttpClient = new OkHttpClient()
+    private OkHttpClient okHttpClient
     private ApkFile mApkFile
+
+    FirUploadUtils() {
+//        def loggingInterceptor = new HttpLoggingInterceptor(new HttpLoggingInterceptor.Logger() {
+//            @Override
+//            void log(String message) {
+//                Logger.debug(message)
+//            }
+//        })
+//        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
+//        okHttpClient = new OkHttpClient.Builder().addNetworkInterceptor(loggingInterceptor).build()
+        okHttpClient = new OkHttpClient.Builder().build()
+    }
 
     /**
      * firUpload
@@ -81,6 +93,9 @@ class FirUploadUtils {
      */
     private void obtainCredentials(Project project, String firApiToken, String firBundleId) {
         Logger.debug("obtain upload credentials...")
+        if (project.jiagu.debug) {
+            Logger.debug("url:http://api.fir.im/apps\ntype:android\nbundle_id:$firBundleId\napi_token:$firApiToken")
+        }
         FormBody.Builder formBodyBuild = new FormBody.Builder()
         formBodyBuild.add("type", "android")
         formBodyBuild.add("bundle_id", firBundleId)
@@ -89,10 +104,13 @@ class FirUploadUtils {
                 .url("http://api.fir.im/apps")
                 .post(formBodyBuild.build())
         Response response = okHttpClient.newCall(builder.build()).execute()
-        if (response != null && response.code() == 201) {
+        if (response != null && response.body() != null) {
             def string = response.body().string()
             if (project.jiagu.debug) {
                 Logger.debug(string)
+            }
+            if (response.code() != 201) {
+                return
             }
             Logger.debug("obtain upload credentials:success")
             JsonObject jsonObject = new JsonParser().parse(string).asJsonObject.getAsJsonObject("cert")

@@ -8,12 +8,12 @@ buildscript {
         maven { url 'https://jitpack.io' }
         // 本地maven库
         maven {
-            url uri('/repo')
+            url uri('D:\\/repository')
         }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.4.0'
-        classpath 'com.s.android.plugin:jiaguplugin:1.2.0'
+        classpath 'com.android.tools.build:gradle:3.4.2'
+        classpath 'com.s.android.plugin:jiaguplugin:1.2.1'
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
         classpath 'com.novoda:bintray-release:0.9.1'
