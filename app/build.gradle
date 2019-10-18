@@ -6,7 +6,7 @@ jiagu {
     username = "huangbo@jadegold.cn"
     password = "Swhj112123321"
     enable = true
-    debug = true
+    debug = false
     jiaguEnable = false
     firEnable = true
 

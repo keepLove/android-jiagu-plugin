@@ -9,6 +9,7 @@ import net.dongliu.apk.parser.ApkFile
 import net.dongliu.apk.parser.bean.Icon
 import net.dongliu.apk.parser.bean.IconFace
 import okhttp3.*
+import okhttp3.logging.HttpLoggingInterceptor
 import org.gradle.api.Project
 
 import java.util.function.Consumer
@@ -17,23 +18,28 @@ class FirUploadUtils {
 
     private OkHttpClient okHttpClient
     private ApkFile mApkFile
+    private boolean debug
 
     FirUploadUtils() {
-//        def loggingInterceptor = new HttpLoggingInterceptor(new HttpLoggingInterceptor.Logger() {
-//            @Override
-//            void log(String message) {
-//                Logger.debug(message)
-//            }
-//        })
-//        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
-//        okHttpClient = new OkHttpClient.Builder().addNetworkInterceptor(loggingInterceptor).build()
-        okHttpClient = new OkHttpClient.Builder().build()
+        def loggingInterceptor = new HttpLoggingInterceptor(new HttpLoggingInterceptor.Logger() {
+            @Override
+            void log(String message) {
+                if (debug) {
+                    Logger.debug(message)
+                }
+            }
+        })
+        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
+        okHttpClient = new OkHttpClient.Builder()
+                .addNetworkInterceptor(loggingInterceptor)
+                .build()
     }
 
     /**
      * firUpload
      */
     void firUpload(Project project) {
+        debug = project.jiagu.debug
         FirUploadEntity mFirUploadEntity = project.jiagu.fir
         String firApiToken = mFirUploadEntity.firApiToken
         if (firApiToken == null || firApiToken.isEmpty()) {
@@ -93,33 +99,31 @@ class FirUploadUtils {
      */
     private void obtainCredentials(Project project, String firApiToken, String firBundleId) {
         Logger.debug("obtain upload credentials...")
-        if (project.jiagu.debug) {
-            Logger.debug("url:http://api.fir.im/apps\ntype:android\nbundle_id:$firBundleId\napi_token:$firApiToken")
-        }
         FormBody.Builder formBodyBuild = new FormBody.Builder()
         formBodyBuild.add("type", "android")
         formBodyBuild.add("bundle_id", firBundleId)
         formBodyBuild.add("api_token", firApiToken)
         Request.Builder builder = new Request.Builder()
-                .url("http://api.fir.im/apps")
+                .url("https://api.fir.im/apps")
                 .post(formBodyBuild.build())
         Response response = okHttpClient.newCall(builder.build()).execute()
         if (response != null && response.body() != null) {
             def string = response.body().string()
-            if (project.jiagu.debug) {
-                Logger.debug(string)
-            }
             if (response.code() != 201) {
                 return
             }
             Logger.debug("obtain upload credentials:success")
-            JsonObject jsonObject = new JsonParser().parse(string).asJsonObject.getAsJsonObject("cert")
+            def parentJsonObject = new JsonParser().parse(string).asJsonObject
+            JsonObject jsonObject = parentJsonObject.getAsJsonObject("cert")
             def binaryObject = jsonObject.getAsJsonObject("binary")
             def iconObject = jsonObject.getAsJsonObject("icon")
-            firUploadApk(project, binaryObject.get("upload_url").asString, binaryObject.get("key").asString,
-                    binaryObject.get("token").asString, jsonObject.get("prefix").asString)
-            firUploadIcon(project, iconObject.get("upload_url").asString, iconObject.get("key").asString,
+            firUploadIcon(iconObject.get("upload_url").asString, iconObject.get("key").asString,
                     iconObject.get("token").asString)
+            String release_id = firUploadApk(project, binaryObject.get("upload_url").asString, binaryObject.get("key").asString,
+                    binaryObject.get("token").asString, jsonObject.get("prefix").asString)
+            if (release_id != null) {
+                Logger.debug("download url : https://fir.im/${parentJsonObject.get("short").asString}?release_id=${release_id}")
+            }
         } else {
             Logger.debug("Unable to obtain upload credentials. $response")
         }
@@ -128,31 +132,20 @@ class FirUploadUtils {
     /**
      * 上传apk
      */
-    private void firUploadApk(Project project, String url, String key, String token, String prefix) {
+    private String firUploadApk(Project project, String url, String key, String token, String prefix) {
         FirUploadEntity mFirUploadEntity = project.jiagu.fir
         String versionCode = mFirUploadEntity.versionCode
         String versionName = mFirUploadEntity.versionName
         File uploadFile = mFirUploadEntity.apkFile
         Logger.debug("fir upload apk. ${uploadFile.path}")
-        if (project.jiagu.debug) {
-            Logger.debug("path: ${uploadFile.path}  " +
-                    "\nurl:$url" +
-                    "\nkey:$key" +
-                    "\ntoken:$token" +
-                    "\n" + "${prefix}name:" + mFirUploadEntity.appName +
-                    "\n" + "${prefix}version:" + versionCode +
-                    "\n" + "${prefix}build:" + versionName +
-                    "\n" + "${prefix}changelog:" + mFirUploadEntity.firChangeLog
-            )
-        }
         MultipartBody.Builder bodybuilder = new MultipartBody.Builder()
         bodybuilder.setType(MultipartBody.FORM)
         bodybuilder.addFormDataPart("key", key)
         bodybuilder.addFormDataPart("token", token)
         bodybuilder.addFormDataPart("file", uploadFile.getName(), RequestBody.create(null, uploadFile))
         bodybuilder.addFormDataPart("${prefix}name", mFirUploadEntity.appName)
-        bodybuilder.addFormDataPart("${prefix}version", versionCode)
-        bodybuilder.addFormDataPart("${prefix}build", versionName)
+        bodybuilder.addFormDataPart("${prefix}version", versionName)
+        bodybuilder.addFormDataPart("${prefix}build", versionCode)
         bodybuilder.addFormDataPart("${prefix}changelog", mFirUploadEntity.firChangeLog)
         Request.Builder builder = new Request.Builder()
                 .url(url)
@@ -160,25 +153,26 @@ class FirUploadUtils {
         Response response = okHttpClient.newCall(builder.build()).execute()
         if (response != null && response.body() != null && response.code() == 200) {
             def string = response.body().string()
-            if (project.jiagu.debug) {
-                Logger.debug(string)
-            }
             def jsonObject = new JsonParser().parse(string).asJsonObject
             boolean isCompleted = jsonObject.get("is_completed").asBoolean
             String download_url = jsonObject.get("download_url").asString
             String release_id = jsonObject.get("release_id").asString
-            Logger.debug("is_completed : $isCompleted")
-            Logger.debug("download_url : $download_url")
-            Logger.debug("release_id   : $release_id")
+            if (isCompleted) {
+                Logger.debug("apk_url : $download_url")
+                return release_id
+            } else {
+                Logger.debug("upload apk failure. $string")
+            }
         } else {
             Logger.debug("upload apk failure. $response")
         }
+        return null
     }
 
     /**
      * 上传icon
      */
-    private void firUploadIcon(Project project, String url, String key, String token) {
+    private void firUploadIcon(String url, String key, String token) {
         Icon icon = null
         mApkFile.getAllIcons().forEach(new Consumer<IconFace>() {
             @Override
@@ -189,9 +183,6 @@ class FirUploadUtils {
             }
         })
         Logger.debug("fir upload icon. ${icon.path}")
-        if (project.jiagu.debug) {
-            Logger.debug(icon.toString() + "\nurl:$url\nkey:${key}\ntoken:$token")
-        }
         MultipartBody.Builder bodybuilder = new MultipartBody.Builder()
         bodybuilder.setType(MultipartBody.FORM)
         bodybuilder.addFormDataPart("key", key)
@@ -203,14 +194,14 @@ class FirUploadUtils {
         Response response = okHttpClient.newCall(builder.build()).execute()
         if (response != null && response.body() != null && response.code() == 200) {
             def string = response.body().string()
-            if (project.jiagu.debug) {
-                Logger.debug(string)
-            }
             def jsonObject = new JsonParser().parse(string).asJsonObject
             boolean isCompleted = jsonObject.get("is_completed").asBoolean
             String download_url = jsonObject.get("download_url").asString
-            Logger.debug("is_completed : $isCompleted")
-            Logger.debug("download_url : $download_url")
+            if (isCompleted) {
+                Logger.debug("upload icon success.  $download_url")
+            } else {
+                Logger.debug("upload icon failure.  $string")
+            }
         } else {
             Logger.debug("upload icon failure. $response")
         }
