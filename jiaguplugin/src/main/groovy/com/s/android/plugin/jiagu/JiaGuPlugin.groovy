@@ -24,8 +24,11 @@ class JiaGuPlugin implements Plugin<Project> {
                 // debug打包，并且开启了debug , 或者release打包
                 if ((variantName.contains("Debug") && project.jiagu.debug) ||
                         variantName.contains("Release")) {
-                    Task jiaGuTask = project.tasks.create("${JiaGuTask.NAME}${variantName}", JiaGuTask.class)
-                    project.tasks["assemble${variantName}"].dependsOn(jiaGuTask)
+                    JiaGuTask jiaGuTask = project.tasks.create("${JiaGuTask.NAME}${variantName}", JiaGuTask.class)
+                    Task assembleTask = project.tasks["assemble${variantName}"]
+                    assembleTask.doLast {
+                        jiaGuTask.start()
+                    }
                 }
             }
         }
