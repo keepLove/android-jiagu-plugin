@@ -1,10 +1,10 @@
-# JiaguPlugin [![](https://img.shields.io/bintray/v/shuaijianwen/android/jiaguplugin.svg)](https://jcenter.bintray.com/com/s/android/plugin/jiaguplugin/) [ ![Download](https://api.bintray.com/packages/shuaijianwen/android/jiaguplugin/images/download.svg?version=1.2.1) ](https://bintray.com/shuaijianwen/android/jiaguplugin/1.2.1/link)
+# JiaguPlugin [![](https://img.shields.io/bintray/v/shuaijianwen/android/jiaguplugin.svg)](https://jcenter.bintray.com/com/s/android/plugin/jiaguplugin/) [ ![Download](https://api.bintray.com/packages/shuaijianwen/android/jiaguplugin/images/download.svg?version=1.3.0) ](https://bintray.com/shuaijianwen/android/jiaguplugin/1.3.0/link)
 
 ### Description
 
-360加固Gradle插件，当执行assemble${variantName}时自动进行apk加固
+360加固和自动上传fir.im 的Gradle插件，当执行assemble${variantName}时自动进行apk加固、上传。
 
-首先需要下载[360加固助手](http://jiagu.360.cn/#/global/download)
+如果需要加固，需要先下载[360加固助手](http://jiagu.360.cn/#/global/download)
 
 ### Adding to project
 
@@ -48,6 +48,7 @@ jiagu {
 |:-----------------:|:-------------:|:---------------------------------------------------------:|:---------------------------:|
 |    debug          |    boolean    |     false                                                 |    调试模式开关，会打印更多log，自动加固        |
 |    enable         |    boolean    |     true                                                  |    插件开关                   |
+|    debugOn        |    boolean    |     false                                                 |    debug时是否启动插件                   |
 |    jiaguEnable    |    boolean    |     true                                                  |    加固开关                   |
 |    firEnable      |    boolean    |     false                                                 |    fir上传开关                   |
 |    jiaGuDir       |    String     |     null                                                  |    360加固助手安装地址\jiagu 类似D:\360jiagubao_windows_64\jiagu         |
@@ -104,6 +105,7 @@ android {
 **说明**
 
 - 插件会在执行assemble${variantName}前生成sJiaGu${variantName}方法
-- 插件会在Release编译打包的时候自动加固，测试模式时Debug编译打包也会执行
+- 插件会在Release编译打包的时候自动启动
+- 如果debugOn=true，插件会在debug编译时自动启动
 
 
