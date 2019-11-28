@@ -22,13 +22,13 @@ class JiaGuPlugin implements Plugin<Project> {
                 }
                 String variantName = variant.name.capitalize()
                 // debug打包，并且开启了debug , 或者release打包
-                if ((variantName.contains("Debug") && project.jiagu.debug) ||
+                if ((variantName.contains("Debug") && project.jiagu.debugOn) ||
                         variantName.contains("Release")) {
                     JiaGuTask jiaGuTask = project.tasks.create("${JiaGuTask.NAME}${variantName}", JiaGuTask.class)
                     Task assembleTask = project.tasks["assemble${variantName}"]
-                    assembleTask.doLast {
-                        jiaGuTask.start()
-                    }
+                    jiaGuTask.dependsOn assembleTask
+                    jiaGuTask.mustRunAfter assembleTask
+                    assembleTask.finalizedBy(jiaGuTask)
                 }
             }
         }

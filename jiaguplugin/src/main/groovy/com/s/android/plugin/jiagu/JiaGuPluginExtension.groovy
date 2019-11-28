@@ -8,6 +8,7 @@ class JiaGuPluginExtension {
 
     boolean debug = false // 调试模式开关
     boolean enable = true // 插件开关
+    boolean debugOn = false // 是否在debug时开启插件
     boolean jiaguEnable = true // 是否加固
     boolean firEnable = false // 是否上传至fir
     String jiaGuDir = null //加固文件地址 必填

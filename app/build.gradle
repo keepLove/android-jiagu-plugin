@@ -7,6 +7,7 @@ jiagu {
     password = "Swhj112123321"
     enable = true
     debug = false
+    debugOn = true
     jiaguEnable = false
     firEnable = true
 
