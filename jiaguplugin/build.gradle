@@ -9,9 +9,10 @@ dependencies {
     implementation 'com.squareup.okhttp3:logging-interceptor:3.10.0'
     implementation 'com.google.code.gson:gson:2.8.5'
     implementation 'net.dongliu:apk-parser:2.6.9'
+    implementation 'com.android.tools.build:gradle:3.4.2'
 }
 
-def version = "1.3.0"
+def version = "1.4.0"
 
 repositories {
     mavenCentral()
@@ -32,6 +33,7 @@ uploadArchives {
 // https://github.com/novoda/bintray-release
 // https://github.com/HailouWang/bintray-release/wiki/%E9%85%8D%E7%BD%AEpublish%E9%97%AD%E5%8C%85
 
+// gradlew clean build bintrayUpload -PbintrayUser=shuaijianwen -PbintrayKey=1d125e01679f89dc543de17f7360ab63346bfedc -PdryRun=false
 // $ ./gradlew clean build bintrayUpload -PbintrayUser=BINTRAY_USERNAME -PbintrayKey=BINTRAY_KEY -PdryRun=false
 // bintrayUser: 用于上传的用户名。bintrayKey: 用户帐户的bintray API密钥。
 // dryRun: 如果设置为“true”，则将运行所有内容，但不会将包上传到bintray。 如果“false”，那么它将正常上传。

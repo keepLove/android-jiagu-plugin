@@ -6,8 +6,8 @@ jiagu {
     username = "huangbo@jadegold.cn"
     password = "Swhj112123321"
     enable = true
-    debug = false
-    debugOn = true
+    debug = true
+    debugOn = false
     jiaguEnable = false
     firEnable = true
 
@@ -49,6 +49,24 @@ android {
             zipAlignEnabled true
             signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    flavorDimensions 'app'
+    productFlavors {
+        apptest1 {
+            dimension = 'app'
+            applicationId = 'com.s.android.plugin.jiaguplugin.test1'
+        }
+        apptest2 {
+            dimension = 'app'
+            applicationId = 'com.s.android.plugin.jiaguplugin.test2'
+        }
+    }
+    applicationVariants.all { variant ->
+        if (variant.flavorName == "apptest1") { // 渠道1：channel1
+            jiagu.debug = true
+        } else if (variant.flavorName == "apptest2") { // 渠道2：channel2
+            jiagu.debug = false
         }
     }
 }

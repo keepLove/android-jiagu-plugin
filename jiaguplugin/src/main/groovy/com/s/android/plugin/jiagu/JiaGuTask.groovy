@@ -1,8 +1,12 @@
 package com.s.android.plugin.jiagu
 
+import com.android.build.gradle.api.ApplicationVariant
+import com.s.android.plugin.jiagu.entity.FirUploadEntity
+import com.s.android.plugin.jiagu.entity.JiaguEntity
 import com.s.android.plugin.jiagu.utils.FirUploadUtils
 import com.s.android.plugin.jiagu.utils.ProcessUtils
 import org.gradle.api.DefaultTask
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
 
 class JiaGuTask extends DefaultTask {
@@ -12,6 +16,11 @@ class JiaGuTask extends DefaultTask {
     private String commandJiaGu
     private String commandExt = ""
     private JiaGuPluginExtension jiaGuPluginExtension
+
+    @Input
+    ApplicationVariant variant
+
+    JiaguEntity mJiaguEntity
 
     JiaGuTask() {
         group = "JiaGu"
@@ -118,10 +127,66 @@ class JiaGuTask extends DefaultTask {
         }
         if (jiaGuPluginExtension.firEnable) {
             Logger.debug("-----start----- fir upload")
-            FirUploadUtils firUploadUtils = new FirUploadUtils()
-            firUploadUtils.firUpload(project)
+            FirUploadUtils.debug = jiaGuPluginExtension.debug
+            FirUploadUtils.firUpload(getFirUploadEntity(variant))
             Logger.debug("------end------ fir upload")
         }
+    }
+
+    private FirUploadEntity getFirUploadEntity(ApplicationVariant variant) {
+        if (!project.jiagu.firEnable) {
+            return null
+        }
+        FirUploadEntity mFirUploadEntity = project.jiagu.fir
+        if (mFirUploadEntity == null) {
+            Logger.debug("firEnable is true.")
+            return null
+        }
+        String firApiToken = mFirUploadEntity.firApiToken
+        if (firApiToken == null || firApiToken.isEmpty()) {
+            Logger.debug("firApiToken can not be null.")
+            return null
+        }
+        if (mFirUploadEntity.versionCode == null) {
+            mFirUploadEntity.versionCode = variant.versionCode
+        }
+        if (mFirUploadEntity.versionName == null) {
+            mFirUploadEntity.versionName = variant.versionName
+        }
+        File uploadFile = mFirUploadEntity.apkFile
+        if (uploadFile == null || !uploadFile.exists()) {
+            uploadFile = variant.outputs[0].outputFile
+        }
+        if (project.jiagu.jiaguEnable) {
+            String name = uploadFile.name.substring(0, uploadFile.name.lastIndexOf(".")) +
+                    "_" + mFirUploadEntity.versionName.replace(".", "") + "_jiagu_sign.apk"
+            File file = new File(project.jiagu.outputFileDir + "\\" + name)
+//            if (file.exists()) {
+            uploadFile = file
+//            }
+        }
+        mFirUploadEntity.apkFile = uploadFile
+        String firBundleId = mFirUploadEntity.firBundleId
+        if (firBundleId == null || firBundleId.isEmpty()) {
+            firBundleId = variant.applicationId
+            if (firBundleId == null || firBundleId.isEmpty()) {
+                firBundleId = project.android.defaultConfig.applicationId
+            }
+        }
+        if (firBundleId == null || firBundleId.isEmpty()) {
+            Logger.debug("firBundleId can not be null.")
+            return null
+        }
+        mFirUploadEntity.firBundleId = firBundleId
+        return mFirUploadEntity
+    }
+
+    private JiaguEntity getJiaguEntity(Object variant) {
+        if (!project.jiagu.jiaguEnable) {
+            return null
+        }
+        JiaguEntity jiaguEntity = new JiaguEntity()
+        return jiaguEntity
     }
 
     /**
