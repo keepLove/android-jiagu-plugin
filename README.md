@@ -1,4 +1,4 @@
-# JiaguPlugin [![](https://img.shields.io/bintray/v/shuaijianwen/android/jiaguplugin.svg)](https://jcenter.bintray.com/com/s/android/plugin/jiaguplugin/) [ ![Download](https://api.bintray.com/packages/shuaijianwen/android/jiaguplugin/images/download.svg?version=1.3.0) ](https://bintray.com/shuaijianwen/android/jiaguplugin/1.3.0/link)
+# JiaguPlugin [![](https://img.shields.io/bintray/v/shuaijianwen/android/jiaguplugin.svg)](https://jcenter.bintray.com/com/s/android/plugin/jiaguplugin/) [ ![Download](https://api.bintray.com/packages/shuaijianwen/android/jiaguplugin/images/download.svg?version=1.4.0) ](https://bintray.com/shuaijianwen/android/jiaguplugin/1.4.0/link)
 
 ### Description
 
@@ -54,10 +54,10 @@ jiagu {
 |    jiaGuDir       |    String     |     null                                                  |    360加固助手安装地址\jiagu 类似D:\360jiagubao_windows_64\jiagu         |
 |    username       |    String     |     null                                                  |    360加固助手登录用户名                   |
 |    password       |    String     |     null                                                  |    360加固助手登录密码                    |
-|    storeFile      |    File       |     android.buildTypes.release.signingConfig.storeFile    |    签名文件（具体说明见下文“签名”）   |
-|    storePassword  |    String     |     android.buildTypes.release.signingConfig.storePassword|    签名密码（具体说明见下文“签名”）   |
-|    keyAlias       |    String     |     android.buildTypes.release.signingConfig.keyAlias     |    别名（具体说明见下文“签名”）   |
-|    keyPassword    |    String     |     android.buildTypes.release.signingConfig.keyPassword  |    别名密码（具体说明见下文“签名”） |
+|    storeFile      |    File       |     buildTypes.signingConfig.storeFile                    |    签名文件（具体说明见下文“签名”）   |
+|    storePassword  |    String     |     buildTypes.signingConfig.storePassword                |    签名密码（具体说明见下文“签名”）   |
+|    keyAlias       |    String     |     buildTypes.signingConfig.keyAlias                     |    别名（具体说明见下文“签名”）   |
+|    keyPassword    |    String     |     buildTypes.signingConfig.keyPassword                  |    别名密码（具体说明见下文“签名”） |
 |    channelFile    |    File       |     null                                                  |    多渠道打包设置，选择.txt文件，下载的jiagu包里有多渠道模板.txt  |
 |    inputFilePath  |    String     |     applicationVariants.outputs.outputFile                |    打包的apk路径   |
 |    outputFileDir  |    String     |     ${project.buildDir.getAbsolutePath()}\jiagu           |    加固后apk的输出路径，app\build\jiagu   |
