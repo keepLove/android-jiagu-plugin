@@ -32,24 +32,30 @@ class JiaGuTask extends DefaultTask {
             Logger.debug("enable: false")
             return
         }
+        Logger.debug("-----start----- jiagu")
         if (jiaGuPluginExtension.jiaguEnable) {
             checkJiaguEntity(variant)
             JiaguUtils.debug = jiaGuPluginExtension.debug
             JiaguUtils.jiagu(jiaGuPluginExtension)
+        } else {
+            Logger.debug("not jiagu")
         }
+        Logger.debug("------end------ jiagu")
+        Logger.debug("-----start----- fir upload")
         if (jiaGuPluginExtension.firEnable) {
-            Logger.debug("-----start----- fir upload")
             FirUploadUtils.debug = jiaGuPluginExtension.debug
             FirUploadUtils.firUpload(getFirUploadEntity(variant))
-            Logger.debug("------end------ fir upload")
+        } else {
+            Logger.debug("not upload")
         }
+        Logger.debug("------end------ fir upload")
     }
 
     private FirUploadEntity getFirUploadEntity(ApplicationVariant variant) {
-        if (!project.jiagu.firEnable) {
+        if (!jiaGuPluginExtension.firEnable) {
             return null
         }
-        FirUploadEntity mFirUploadEntity = project.jiagu.fir
+        FirUploadEntity mFirUploadEntity = jiaGuPluginExtension.fir
         if (mFirUploadEntity == null) {
             Logger.debug("firEnable is true.")
             return null
@@ -69,10 +75,10 @@ class JiaGuTask extends DefaultTask {
         if (uploadFile == null || !uploadFile.exists()) {
             uploadFile = variant.outputs[0].outputFile
         }
-        if (project.jiagu.jiaguEnable) {
+        if (jiaGuPluginExtension.jiaguEnable) {
             String name = uploadFile.name.substring(0, uploadFile.name.lastIndexOf(".")) +
                     "_" + mFirUploadEntity.versionName.replace(".", "") + "_jiagu_sign.apk"
-            File file = new File(project.jiagu.outputFileDir + "\\" + name)
+            File file = new File(jiaGuPluginExtension.outputFileDir + "\\" + name)
 //            if (file.exists()) {
             uploadFile = file
 //            }

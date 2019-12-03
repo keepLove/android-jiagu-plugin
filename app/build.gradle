@@ -6,7 +6,7 @@ jiagu {
     username = "huangbo@jadegold.cn"
     password = "Swhj112123321"
     enable = true
-    debug = true
+    debug = false
     debugOn = false
     jiaguEnable = true
     firEnable = true
@@ -60,13 +60,6 @@ android {
         apptest2 {
             dimension = 'app'
             applicationId = 'com.s.android.plugin.jiaguplugin.test2'
-        }
-    }
-    applicationVariants.all { variant ->
-        if (variant.flavorName == "apptest1") { // 渠道1：channel1
-            jiagu.debug = true
-        } else if (variant.flavorName == "apptest2") { // 渠道2：channel2
-            jiagu.debug = false
         }
     }
 }

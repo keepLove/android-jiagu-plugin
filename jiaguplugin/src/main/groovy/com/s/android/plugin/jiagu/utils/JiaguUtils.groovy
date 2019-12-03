@@ -13,7 +13,6 @@ class JiaguUtils {
         ProcessUtils.debug = debug
         commandExt = ""
         commandJiaGu = "${jiaGuPluginExtension.jiaGuDir}\\java\\bin\\java -jar ${jiaGuPluginExtension.jiaGuDir}\\jiagu.jar "
-        Logger.debug("-----start-----")
         // 登录
         String result = login(jiaGuPluginExtension)
         if (result.contains("success")) {
@@ -49,7 +48,6 @@ class JiaguUtils {
             Logger.debug(result)
             throw new RuntimeException("登录失败")
         }
-        Logger.debug("-----end-----")
     }
 
     /**
