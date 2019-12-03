@@ -2,9 +2,8 @@ package com.s.android.plugin.jiagu
 
 import com.android.build.gradle.api.ApplicationVariant
 import com.s.android.plugin.jiagu.entity.FirUploadEntity
-import com.s.android.plugin.jiagu.entity.JiaguEntity
 import com.s.android.plugin.jiagu.utils.FirUploadUtils
-import com.s.android.plugin.jiagu.utils.ProcessUtils
+import com.s.android.plugin.jiagu.utils.JiaguUtils
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
@@ -13,102 +12,14 @@ class JiaGuTask extends DefaultTask {
 
     static final String NAME = "sJiaGu"
 
-    private String commandJiaGu
-    private String commandExt = ""
     private JiaGuPluginExtension jiaGuPluginExtension
 
     @Input
     ApplicationVariant variant
 
-    JiaguEntity mJiaguEntity
-
     JiaGuTask() {
         group = "JiaGu"
-        description = "360 jiagu plugin"
-    }
-
-    /**
-     * 加固登录
-     */
-    private String login() {
-        return ProcessUtils.exec(commandJiaGu + " -login ${jiaGuPluginExtension.username} ${jiaGuPluginExtension.password}")
-    }
-
-    /**
-     * 导入签名信息
-     */
-    private String importSign() {
-        try {
-            if (jiaGuPluginExtension.storeFile == null || !jiaGuPluginExtension.storeFile.exists()) {
-                jiaGuPluginExtension.storeFile = project.android.buildTypes.release.signingConfig.storeFile
-                jiaGuPluginExtension.storePassword = project.android.buildTypes.release.signingConfig.storePassword
-                jiaGuPluginExtension.keyAlias = project.android.buildTypes.release.signingConfig.keyAlias
-                jiaGuPluginExtension.keyPassword = project.android.buildTypes.release.signingConfig.keyPassword
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace()
-        }
-        if (jiaGuPluginExtension.storeFile != null && jiaGuPluginExtension.storeFile.exists()) {
-            commandExt += " -autosign "
-            return ProcessUtils.exec(commandJiaGu + " -importsign ${jiaGuPluginExtension.storeFile.getAbsolutePath()}" +
-                    " ${jiaGuPluginExtension.storePassword}  ${jiaGuPluginExtension.keyAlias}  ${jiaGuPluginExtension.keyPassword}")
-        }
-        return "未导入签名信息"
-    }
-
-    /**
-     * 导入渠道信息
-     */
-    private String importMulPkg() {
-        if (jiaGuPluginExtension.channelFile != null && jiaGuPluginExtension.channelFile.exists()) {
-            commandExt += " -automulpkg "
-            return ProcessUtils.exec(commandJiaGu + " -importmulpkg ${jiaGuPluginExtension.channelFile}")
-        }
-        return "未导入渠道信息"
-    }
-
-    /**
-     * 配置加固服务
-     */
-    private String setConfig() {
-        if (jiaGuPluginExtension.config == null || jiaGuPluginExtension.config.isEmpty()) {
-            // 选择崩溃日志服务、支持x86架构设备、选择数据分析服务
-            jiaGuPluginExtension.config = "-crashlog -x86 -analyse"
-        }
-        // 配置加固服务
-        return ProcessUtils.exec(commandJiaGu + " -config ${jiaGuPluginExtension.config}")
-    }
-
-    /**
-     * 加固
-     */
-    private String jiaguStart() {
-        if (jiaGuPluginExtension.inputFilePath == null || jiaGuPluginExtension.inputFilePath.isEmpty()) {
-            String outputFilePath = ""
-            String taskName = getName()
-            try {
-                project.android.applicationVariants.all { variant ->
-                    variant.outputs.all { output ->
-                        if (taskName.contains(variant.name.capitalize())) {
-                            outputFilePath = output.outputFile.getAbsolutePath()
-                        }
-                    }
-                }
-            } catch (Exception ex) {
-                ex.printStackTrace()
-            }
-            jiaGuPluginExtension.inputFilePath = outputFilePath
-        }
-        if (jiaGuPluginExtension.outputFileDir == null || jiaGuPluginExtension.outputFileDir.isEmpty()) {
-            jiaGuPluginExtension.outputFileDir = "${project.buildDir.getAbsolutePath()}\\jiagu"
-        }
-        def outputFile = new File(jiaGuPluginExtension.outputFileDir)
-        if (!outputFile.exists()) {
-            outputFile.mkdirs()
-        }
-        // 应用加固
-        String cmd = commandJiaGu + " -jiagu ${jiaGuPluginExtension.inputFilePath} ${jiaGuPluginExtension.outputFileDir}"
-        return ProcessUtils.exec(cmd + commandExt)
+        description = "360 jiagu plugin and upload apk to fir.im"
     }
 
     /**
@@ -121,9 +32,10 @@ class JiaGuTask extends DefaultTask {
             Logger.debug("enable: false")
             return
         }
-        ProcessUtils.debug = jiaGuPluginExtension.debug
         if (jiaGuPluginExtension.jiaguEnable) {
-            startJiagu()
+            checkJiaguEntity(variant)
+            JiaguUtils.debug = jiaGuPluginExtension.debug
+            JiaguUtils.jiagu(jiaGuPluginExtension)
         }
         if (jiaGuPluginExtension.firEnable) {
             Logger.debug("-----start----- fir upload")
@@ -181,18 +93,7 @@ class JiaGuTask extends DefaultTask {
         return mFirUploadEntity
     }
 
-    private JiaguEntity getJiaguEntity(Object variant) {
-        if (!project.jiagu.jiaguEnable) {
-            return null
-        }
-        JiaguEntity jiaguEntity = new JiaguEntity()
-        return jiaguEntity
-    }
-
-    /**
-     * 开始加固
-     */
-    void startJiagu() {
+    private void checkJiaguEntity(ApplicationVariant variant) {
         if (jiaGuPluginExtension.jiaGuDir == null || jiaGuPluginExtension.jiaGuDir.isEmpty()) {
             throw new NullPointerException("jiaGuDir 必填")
         }
@@ -210,44 +111,30 @@ class JiaGuTask extends DefaultTask {
         if (jiaguJarFile == null || !jiaguJarFile.exists()) {
             throw new NullPointerException("jiagu.jar 不存在")
         }
-        commandJiaGu = "${jiaGuPluginExtension.jiaGuDir}\\java\\bin\\java -jar ${jiaGuPluginExtension.jiaGuDir}\\jiagu.jar "
-        Logger.debug("-----start-----")
-        // 登录
-        String result = login()
-        if (result.contains("success")) {
-            Logger.debug("login success")
-            // 导入签名keystore信息
-            result = importSign()
-            if (result.contains("succeed")) {
-                result = "导入签名 succeed"
+        try {
+            if (jiaGuPluginExtension.storeFile == null || !jiaGuPluginExtension.storeFile.exists()) {
+                jiaGuPluginExtension.storeFile = variant.buildType.signingConfig.storeFile
+                jiaGuPluginExtension.storePassword = variant.buildType.signingConfig.storePassword
+                jiaGuPluginExtension.keyAlias = variant.buildType.signingConfig.keyAlias
+                jiaGuPluginExtension.keyPassword = variant.buildType.signingConfig.keyPassword
             }
-            Logger.debug(result)
-            // 导入渠道信息
-            Logger.debug(importMulPkg())
-            // 配置加固服务
-            result = setConfig()
-            if (result.contains("config saving succeed.")) {
-                def indexOf = result.indexOf("已选增强服务")
-                if (indexOf > -1) {
-                    result = result.substring(indexOf).trim()
-                } else {
-                    result = "已选增强服务：${jiaGuPluginExtension.config}"
-                }
+            if (jiaGuPluginExtension.config == null || jiaGuPluginExtension.config.isEmpty()) {
+                // 选择崩溃日志服务、支持x86架构设备、选择数据分析服务
+                jiaGuPluginExtension.config = "-crashlog -x86 -analyse"
             }
-            Logger.debug(result)
-            Logger.debug("加固中........")
-            // 加固
-            result = jiaguStart()
-            if (result.contains("任务完成_已签名")) {
-                result = "任务完成_已签名"
+            if (jiaGuPluginExtension.inputFilePath == null || jiaGuPluginExtension.inputFilePath.isEmpty()) {
+                jiaGuPluginExtension.inputFilePath = variant.outputs[0].outputFile.getAbsolutePath()
             }
-            Logger.debug(result)
-            Logger.debug("输出目录：${jiaGuPluginExtension.outputFileDir}")
-        } else {
-            Logger.debug(result)
-            throw new RuntimeException("登录失败")
+            if (jiaGuPluginExtension.outputFileDir == null || jiaGuPluginExtension.outputFileDir.isEmpty()) {
+                jiaGuPluginExtension.outputFileDir = "${project.buildDir.getAbsolutePath()}\\jiagu"
+            }
+            def outputFile = new File(jiaGuPluginExtension.outputFileDir)
+            if (!outputFile.exists()) {
+                outputFile.mkdirs()
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace()
         }
-        Logger.debug("-----end-----")
     }
 
 }
