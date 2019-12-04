@@ -8,7 +8,7 @@ jiagu {
     enable = true
     debug = false
     debugOn = false
-    jiaguEnable = true
+    jiaguEnable = false
     firEnable = false
 
     fir {

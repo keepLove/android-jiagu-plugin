@@ -1,4 +1,4 @@
-# JiaguPlugin [![](https://img.shields.io/bintray/v/shuaijianwen/android/jiaguplugin.svg)](https://jcenter.bintray.com/com/s/android/plugin/jiaguplugin/) [ ![Download](https://api.bintray.com/packages/shuaijianwen/android/jiaguplugin/images/download.svg?version=1.4.0) ](https://bintray.com/shuaijianwen/android/jiaguplugin/1.4.0/link)
+# JiaguPlugin [![](https://img.shields.io/bintray/v/shuaijianwen/android/jiaguplugin.svg)](https://jcenter.bintray.com/com/s/android/plugin/jiaguplugin/) [ ![Download](https://api.bintray.com/packages/shuaijianwen/android/jiaguplugin/images/download.svg?version=1.4.2) ](https://bintray.com/shuaijianwen/android/jiaguplugin/1.4.2/link)
 
 ### Description
 
@@ -102,7 +102,25 @@ android {
          [-so_private]                           【SO防盗用】
 ```
 
-**说明**
+### other
+
+如果使用了ProductFlavors区分产品渠道，想在不同的flavor开启插件，可配置：
+
+```
+    applicationVariants.all { variant ->
+        if (variant.flavorName == "apptest1") { // 渠道1：channel1
+            variant.ext.jiaguEnable = false
+            variant.ext.jiaguJiaguEnable = false
+            variant.ext.jiaguFirEnable = false
+        } else if (variant.flavorName == "apptest2") { // 渠道2：channel2
+            variant.ext.jiaguEnable = true
+            variant.ext.jiaguJiaguEnable = false
+            variant.ext.jiaguFirEnable = false
+        }
+    }
+```
+
+### tip
 
 - 插件会在执行assemble${variantName}前生成sJiaGu${variantName}方法
 - 插件会在Release编译打包的时候自动启动
