@@ -36,7 +36,7 @@ class JiaguUtils {
                 }
             }
             Logger.debug(result)
-            Logger.debug("加固中........")
+            Logger.debug("加固中... " + jiaGuPluginExtension.inputFilePath)
             // 加固
             result = jiaguStart(jiaGuPluginExtension)
             if (result.contains("任务完成_已签名")) {

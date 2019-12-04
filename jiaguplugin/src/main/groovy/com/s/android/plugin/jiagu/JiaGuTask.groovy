@@ -28,8 +28,9 @@ class JiaGuTask extends DefaultTask {
     @TaskAction
     void start() {
         jiaGuPluginExtension = project.extensions.findByName(JiaGuPlugin.EXTENSION_NAME) as JiaGuPluginExtension
+        checkVariantParams()
         if (!jiaGuPluginExtension.enable) {
-            Logger.debug("enable: false")
+            Logger.debug("plugin enable: false")
             return
         }
         Logger.debug("-----start----- jiagu")
@@ -49,6 +50,24 @@ class JiaGuTask extends DefaultTask {
             Logger.debug("not upload")
         }
         Logger.debug("------end------ fir upload")
+    }
+
+    private void checkVariantParams() {
+        if (!variant.hasProperty("ext")) {
+            return
+        }
+        try {
+            jiaGuPluginExtension.enable = variant.ext.jiaguEnable
+        } catch (Exception ignored) {
+        }
+        try {
+            jiaGuPluginExtension.jiaguEnable = variant.ext.jiaguJiaguEnable
+        } catch (Exception ignored) {
+        }
+        try {
+            jiaGuPluginExtension.firEnable = variant.ext.jiaguFirEnable
+        } catch (Exception ignored) {
+        }
     }
 
     private FirUploadEntity getFirUploadEntity(ApplicationVariant variant) {

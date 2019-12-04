@@ -20,11 +20,11 @@ class JiaGuPlugin implements Plugin<Project> {
             return
         }
         project.extensions.create(EXTENSION_NAME, JiaGuPluginExtension.class, project)
-        // 禁止插件
-        if (false == project.jiagu.enable) {
-            Logger.debug("enable: false")
-            return
-        }
+//        // 禁止插件
+//        if (false == project.jiagu.enable) {
+//            Logger.debug("enable: false")
+//            return
+//        }
         this.project = project
         project.afterEvaluate {
             project.android.applicationVariants.all { ApplicationVariant variant ->

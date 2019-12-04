@@ -9,7 +9,7 @@ jiagu {
     debug = false
     debugOn = false
     jiaguEnable = true
-    firEnable = true
+    firEnable = false
 
     fir {
         firApiToken = "5f238a7d121e9c775c32958cb1f9a2a1"
@@ -62,6 +62,17 @@ android {
             applicationId = 'com.s.android.plugin.jiaguplugin.test2'
         }
     }
+//    applicationVariants.all { variant ->
+//        if (variant.flavorName == "apptest1") { // 渠道1：channel1
+//            variant.ext.jiaguEnable = false
+//            variant.ext.jiaguJiaguEnable = false
+//            variant.ext.jiaguFirEnable = false
+//        } else if (variant.flavorName == "apptest2") { // 渠道2：channel2
+//            variant.ext.jiaguEnable = true
+//            variant.ext.jiaguJiaguEnable = false
+//            variant.ext.jiaguFirEnable = false
+//        }
+//    }
 }
 
 dependencies {
