@@ -6,6 +6,10 @@ import com.s.android.plugin.jiagu.utils.Utils
 class JiaGuPluginExtension {
 
     /**
+     * debug 模式
+     */
+    boolean debug = false
+    /**
      * 360加固文件根目录 必填
      */
     String jiaGuDir = null
@@ -18,7 +22,7 @@ class JiaGuPluginExtension {
      */
     String password = null
     /**
-     * 签名文件，默认读取名为'release'的签名文件
+     * 签名文件，默认读取buildType中的signingConfig 或名为'release'的签名文件
      */
     SigningConfig signingConfig = null
     /**
@@ -30,7 +34,7 @@ class JiaGuPluginExtension {
      */
     String outputFileDir = null
     /**
-     * 扩展配置 默认配置-crashlog -x86 -analyse
+     * 扩展配置
      */
     String config = null
     /**

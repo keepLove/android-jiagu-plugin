@@ -1,5 +1,6 @@
 package com.s.android.plugin.jiagu.utils
 
+import com.android.build.gradle.api.BaseVariantOutput
 import com.s.android.plugin.jiagu.JiaGuPluginExtension
 import com.s.android.plugin.jiagu.Logger
 
@@ -8,7 +9,7 @@ class JiaguUtils {
     private static String commandJiaGu
     private static String commandExt = ""
 
-    static void jiagu(JiaGuPluginExtension jiaGuExtension) {
+    static void jiagu(JiaGuPluginExtension jiaGuExtension, BaseVariantOutput variantOutput) {
         commandExt = ""
         commandJiaGu = "${jiaGuExtension.jiaGuDir}\\java\\bin\\java -jar ${jiaGuExtension.jiaGuDir}\\jiagu.jar "
         // 登录
@@ -34,9 +35,9 @@ class JiaguUtils {
                 }
             }
             Logger.debug(result)
-            Logger.debug("加固中... " + jiaGuExtension.inputFilePath)
+            Logger.debug("加固中... " + variantOutput.outputFile.path)
             // 加固
-            result = jiaguStart(jiaGuExtension)
+            result = jiaguStart(jiaGuExtension, variantOutput)
             if (result.contains("任务完成_已签名")) {
                 result = "任务完成_已签名"
             }
@@ -59,7 +60,7 @@ class JiaguUtils {
      * 2.导入签名信息
      */
     private static String importSign(JiaGuPluginExtension jiaGuExtension) {
-        if (jiaGuExtension.storeFile != null && jiaGuExtension.storeFile.exists()) {
+        if (jiaGuExtension.signingConfig != null) {
             commandExt += " -autosign "
             return ProcessUtils.exec(commandJiaGu + " -importsign ${jiaGuExtension.getSign()}")
         }
@@ -88,9 +89,9 @@ class JiaguUtils {
     /**
      * 5.加固
      */
-    private static String jiaguStart(JiaGuPluginExtension jiaGuExtension) {
+    private static String jiaguStart(JiaGuPluginExtension jiaGuExtension, BaseVariantOutput variantOutput) {
         // 应用加固
-        String cmd = commandJiaGu + " -jiagu ${jiaGuExtension.inputFilePath} ${jiaGuExtension.outputFileDir}"
+        String cmd = commandJiaGu + " -jiagu ${variantOutput.outputFile.absolutePath} ${jiaGuExtension.outputFileDir}"
         return ProcessUtils.exec(cmd + commandExt)
     }
 }

@@ -35,6 +35,22 @@ class ProcessUtils {
         } catch (IOException ex) {
             ex.printStackTrace()
         }
+        def tmp = """
+            ################################################
+            #                                              #
+            #        ## #   #    ## ### ### ##  ###        #
+            #       # # #   #   # #  #  # # # #  #         #
+            #       ### #   #   ###  #  # # ##   #         #
+            #       # # ### ### # #  #  ### # # ###        #
+            #                                              #
+            # Obfuscation by Allatori Obfuscator v5.6 DEMO #
+            #                                              #
+            #           http://www.allatori.com            #
+            #                                              #
+            ################################################
+            
+        """.trim()
+        returnString = returnString.replace(tmp, "")
         if (debug) {
             Logger.debug(returnString)
         }
