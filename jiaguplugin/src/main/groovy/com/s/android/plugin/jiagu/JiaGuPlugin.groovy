@@ -1,51 +1,91 @@
 package com.s.android.plugin.jiagu
 
+import com.android.build.gradle.AppExtension
 import com.android.build.gradle.api.ApplicationVariant
-import org.gradle.api.Plugin
-import org.gradle.api.Project
-import org.gradle.api.Task
+import com.s.android.plugin.jiagu.utils.Utils
+import org.gradle.api.*
 
 class JiaGuPlugin implements Plugin<Project> {
 
     static final String EXTENSION_NAME = 'jiagu'
-    private Project project
 
     @Override
     void apply(Project project) {
         if (!project.plugins.hasPlugin("com.android.application")) {
-            throw new RuntimeException(
-                    "'com.android.application' plugin must be applied")
+            throw new GradleException("无法在非android application插件中使用360加固")
         }
-        if (!project.android.hasProperty("applicationVariants")) {
-            return
-        }
-        project.extensions.create(EXTENSION_NAME, JiaGuPluginExtension.class, project)
-//        // 禁止插件
-//        if (false == project.jiagu.enable) {
-//            Logger.debug("enable: false")
-//            return
-//        }
-        this.project = project
-        project.afterEvaluate {
-            project.android.applicationVariants.all { ApplicationVariant variant ->
-                String variantName = variant.name.capitalize()
-                // debug打包，并且开启了debug, 或者release打包
-                if ((variantName.contains("Debug") && project.jiagu.debugOn) ||
-                        variantName.contains("Release")) {
-                    addTasks(variant, variantName)
-                }
+        project.extensions.create(EXTENSION_NAME, JiaGuPluginExtension.class)
+        project.afterEvaluate(new Action<Project>() {
+            @Override
+            void execute(Project resource) {
+                def jiaGuExtension = resource.extensions.getByType(JiaGuPluginExtension.class)
+                def android = project.extensions.getByType(AppExtension.class)
+                android.applicationVariants.all(new Action<ApplicationVariant>() {
+                    @Override
+                    void execute(ApplicationVariant variant) {
+                        if (jiaGuExtension.signingConfig == null) {
+                            jiaGuExtension.signingConfig = variant.signingConfig
+                        }
+                        addJiaGuTask(resource, variant.flavorName, variant.buildType.name)
+                    }
+                })
             }
-        }
+        })
     }
 
-    private void addTasks(ApplicationVariant applicationVariant, String variantName) {
-        JiaGuTask jiaGuTask = project.tasks.create(name: "${JiaGuTask.NAME}${variantName}", type: JiaGuTask.class) {
-            variant = applicationVariant
+    /**
+     * 添加jiaGuTask
+     */
+    private static void addJiaGuTask(
+            Project project,
+            String flavorName,
+            String buildType
+    ) {
+        // 添加task到assembleRelease之后
+        addAssembleTask(project, flavorName, buildType)
+        // 依赖assembleRelease,assembleDebug添加task任务
+        addDependsOnTask(project, flavorName, buildType)
+    }
+
+    /**
+     * 添加task到assembleRelease之后
+     */
+    private static void addAssembleTask(
+            Project project,
+            String flavorName,
+            String buildType
+    ) {
+//        def name = Utils.capitalize(flavorName)
+//        def type = Utils.capitalize(buildType)
+        def jiaGuTask = createTask(project, flavorName, buildType, "Apk")
+//        Task assembleTask = project.tasks["assemble${name}${type}"]
+//        assembleTask.finalizedBy(jiaGuTask)
+    }
+
+    /**
+     * 创建加固task
+     */
+    private static void addDependsOnTask(
+            Project project,
+            String flavorName,
+            String buildType
+    ) {
+        def name = Utils.capitalize(flavorName)
+        def type = Utils.capitalize(buildType)
+        def jiaGuTask = createTask(project, flavorName, buildType, "Assemble")
+        jiaGuTask.dependsOn("assemble${name}${type}")
+    }
+
+    /**
+     * 创建task
+     */
+    private static Task createTask(Project project, String flavorName, String buildType, String prefix) {
+        def name = Utils.capitalize(flavorName)
+        def type = Utils.capitalize(buildType)
+        return project.tasks.create("jiaGu${prefix}${name}${type}", JiaGuTask.class) {
+            currentFlavorName = flavorName
+            currentBuildType = buildType
         }
-        Task assembleTask = project.tasks["assemble${variantName}"]
-        jiaGuTask.dependsOn assembleTask
-        jiaGuTask.mustRunAfter assembleTask
-        assembleTask.finalizedBy(jiaGuTask)
     }
 
 }

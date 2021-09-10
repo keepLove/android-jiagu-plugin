@@ -6,6 +6,8 @@ class ProcessUtils {
 
     static boolean debug = false
 
+    static String charsetName = "UTF-8"
+
     /**
      * 执行命令行
      *
@@ -23,7 +25,7 @@ class ProcessUtils {
                 Logger.debug(command)
             }
             Process pro = runTime.exec(command)
-            BufferedReader input = new BufferedReader(new InputStreamReader(pro.getInputStream(), "GBK"))
+            BufferedReader input = new BufferedReader(new InputStreamReader(pro.getInputStream(), charsetName))
             String line
             while ((line = input.readLine()) != null) {
                 returnString = returnString + line + "\n"
