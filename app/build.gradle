@@ -1,15 +1,15 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
-apply plugin: 'jiagu'
-
-jiagu {
-    debug = true
-    jiaGuDir = "D:\\file\\360jiagubao_windows_64\\jiagu"
-    username = ""
-    password = ""
-//    charsetName = "GBK"
-}
+//apply plugin: 'jiagu'
+//
+//jiagu {
+//    debug = true
+//    jiaGuDir = "D:\\file\\360jiagubao_windows_64\\jiagu"
+//    username = ""
+//    password = ""
+////    charsetName = "GBK"
+//}
 
 android {
     compileSdkVersion 30
