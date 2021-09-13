@@ -7,7 +7,7 @@ dependencies {
 }
 
 group = "com.github.keepLove"
-version = "2.0"
+version = "2.1"
 
 repositories {
     mavenCentral()
@@ -22,7 +22,7 @@ afterEvaluate {
                 from(components["java"])
                 groupId = 'com.github.keepLove'
                 artifactId = 'android-jiagu-plugin'
-                version = "2.0"
+                version = "2.1"
             }
         }
     }
