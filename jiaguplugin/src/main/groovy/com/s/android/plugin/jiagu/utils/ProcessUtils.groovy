@@ -1,12 +1,10 @@
 package com.s.android.plugin.jiagu.utils
 
-import com.s.android.plugin.jiagu.Logger
-
 class ProcessUtils {
 
     static boolean debug = false
 
-    static String charsetName = "UTF-8"
+    static String charsetName = "GBK"
 
     /**
      * 执行命令行
@@ -22,37 +20,31 @@ class ProcessUtils {
         }
         try {
             if (debug) {
-                Logger.debug(command)
+                Logger.debug("命令行执行语句 => " + command)
             }
             Process pro = runTime.exec(command)
-            BufferedReader input = new BufferedReader(new InputStreamReader(pro.getInputStream(), charsetName))
-            String line
-            while ((line = input.readLine()) != null) {
-                returnString = returnString + line + "\n"
-            }
-            input.close()
+            returnString = Utils.readText(new InputStreamReader(pro.getInputStream(), charsetName))
             pro.destroy()
         } catch (IOException ex) {
             ex.printStackTrace()
         }
-        def tmp = """
-            ################################################
-            #                                              #
-            #        ## #   #    ## ### ### ##  ###        #
-            #       # # #   #   # #  #  # # # #  #         #
-            #       ### #   #   ###  #  # # ##   #         #
-            #       # # ### ### # #  #  ### # # ###        #
-            #                                              #
-            # Obfuscation by Allatori Obfuscator v5.6 DEMO #
-            #                                              #
-            #           http://www.allatori.com            #
-            #                                              #
-            ################################################
-            
+        String tmp = """
+################################################
+#                                              #
+#        ## #   #    ## ### ### ##  ###        #
+#       # # #   #   # #  #  # # # #  #         #
+#       ### #   #   ###  #  # # ##   #         #
+#       # # ### ### # #  #  ### # # ###        #
+#                                              #
+# Obfuscation by Allatori Obfuscator v5.6 DEMO #
+#                                              #
+#           http://www.allatori.com            #
+#                                              #
+################################################
         """.trim()
-        returnString = returnString.replace(tmp, "")
+        returnString = returnString.replace(tmp, "").trim()
         if (debug) {
-            Logger.debug(returnString)
+            Logger.debug("命令行执行返回 => " + returnString)
         }
         return returnString
     }

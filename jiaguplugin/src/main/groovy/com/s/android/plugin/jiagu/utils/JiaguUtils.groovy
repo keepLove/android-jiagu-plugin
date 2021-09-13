@@ -1,8 +1,7 @@
 package com.s.android.plugin.jiagu.utils
 
 import com.android.build.gradle.api.BaseVariantOutput
-import com.s.android.plugin.jiagu.JiaGuPluginExtension
-import com.s.android.plugin.jiagu.Logger
+import com.s.android.plugin.jiagu.entity.JiaGuPluginExtension
 
 class JiaguUtils {
 
@@ -60,7 +59,7 @@ class JiaguUtils {
      * 2.导入签名信息
      */
     private static String importSign(JiaGuPluginExtension jiaGuExtension) {
-        if (jiaGuExtension.signingConfig != null) {
+        if (!Utils.isBlank(jiaGuExtension.signingConfig)) {
             commandExt += " -autosign "
             return ProcessUtils.exec(commandJiaGu + " -importsign ${jiaGuExtension.getSign()}")
         }
@@ -71,7 +70,7 @@ class JiaguUtils {
      * 3.导入渠道信息
      */
     private static String importMulPkg(JiaGuPluginExtension jiaGuExtension) {
-        if (jiaGuExtension.channelFile != null && jiaGuExtension.channelFile.exists()) {
+        if (!Utils.isBlank(jiaGuExtension.channelFile) && jiaGuExtension.channelFile.exists()) {
             commandExt += " -automulpkg "
             return ProcessUtils.exec(commandJiaGu + " -importmulpkg ${jiaGuExtension.channelFile}")
         }

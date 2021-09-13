@@ -3,7 +3,9 @@ package com.s.android.plugin.jiagu
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.api.ApplicationVariant
 import com.android.build.gradle.api.BaseVariantOutput
+import com.s.android.plugin.jiagu.entity.JiaGuPluginExtension
 import com.s.android.plugin.jiagu.utils.JiaguUtils
+import com.s.android.plugin.jiagu.utils.Logger
 import com.s.android.plugin.jiagu.utils.ProcessUtils
 import com.s.android.plugin.jiagu.utils.Utils
 import org.gradle.api.Action

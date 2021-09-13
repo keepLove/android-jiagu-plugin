@@ -1,73 +1,53 @@
-# JiaguPlugin [![](https://img.shields.io/bintray/v/shuaijianwen/android/jiaguplugin.svg)](https://jcenter.bintray.com/com/s/android/plugin/jiaguplugin/) [ ![Download](https://api.bintray.com/packages/shuaijianwen/android/jiaguplugin/images/download.svg?version=1.4.2) ](https://bintray.com/shuaijianwen/android/jiaguplugin/1.4.2/link)
+# 360加固插件 [![JiaguPlugin](https://jitpack.io/v/com.github.keepLove/android-jiagu-plugin.svg)](https://jitpack.io/#com.github.keepLove/android-jiagu-plugin)
 
-### Description
+## Dependency
 
-360加固和自动上传fir.im 的Gradle插件，当执行assemble${variantName}时自动进行apk加固、上传。
+#### Step 1. Add the JitPack repository to your build file
 
-如果需要加固，需要先下载[360加固助手](http://jiagu.360.cn/#/global/download)
+Add it in your root build.gradle at the end of repositories:
 
-### Adding to project
-
-在项目的buid.gradle文件的dependencies（buildscript部分）中添加：
 ```
-buildscript {
-    repositories {
-        ...
-        jcenter()
-    }
+    allprojects {
+        repositories {
+			...
+			maven { url 'https://jitpack.io' }
+		}
+	}
+```
+
+#### Step 2. Add the dependency
+
+```
     dependencies {
         ...
-        classpath 'com.s.android.plugin:jiaguplugin:latest.release'
-    }
-}
+        classpath 'com.github.keepLove:android-jiagu-plugin:TAG'
+	}
 ```
 
-在module的buid.gradle文件的顶部添加：
+#### Step 3. Add the pulgin
 
 ```
-...
 apply plugin: 'jiagu'
 
 jiagu {
-    jiaGuDir = ""
-    username = ""
-    password = ""
-    fir {
-        firApiToken = ""
-        firChangeLog = ""
-    }
+    debug = false // debug 模式
+    jiaGuDir = "D:\\360jiagubao_windows_64\\jiagu" // 360加固文件根目录 必填
+    username = "xxxxx" // 360加固用户名 必填
+    password = "xxx" // 360加固密码 必填
+    signingConfig = null // 签名文件，默认读取buildType中的signingConfig 或名为'release'的签名文件
+    channelFile = null // 指向通道备注文件.txt 默认null
+    outputFileDir = null // 输出apk文件地址 默认输出 build\jiagu
+    config = null // 扩展配置
+    charsetName = "GBK" // 控制台输出编码方式，默认GBK
 }
+
+
 ```
-**其中jiaGuDir、username和password是必填的。**
-
-**如果firEnable为true，firApiToken必填**
-
-还可以设置其他属性，属性列表如下：
-
-|       属性        |	    类型    |                          默认值                           |                    说 明                    |
-|:-----------------:|:-------------:|:---------------------------------------------------------:|:---------------------------:|
-|    debug          |    boolean    |     false                                                 |    调试模式开关，会打印更多log，自动加固        |
-|    enable         |    boolean    |     true                                                  |    插件开关                   |
-|    debugOn        |    boolean    |     false                                                 |    debug时是否启动插件                   |
-|    jiaguEnable    |    boolean    |     true                                                  |    加固开关                   |
-|    firEnable      |    boolean    |     false                                                 |    fir上传开关                   |
-|    jiaGuDir       |    String     |     null                                                  |    360加固助手安装地址\jiagu 类似D:\360jiagubao_windows_64\jiagu         |
-|    username       |    String     |     null                                                  |    360加固助手登录用户名                   |
-|    password       |    String     |     null                                                  |    360加固助手登录密码                    |
-|    storeFile      |    File       |     buildTypes.signingConfig.storeFile                    |    签名文件（具体说明见下文“签名”）   |
-|    storePassword  |    String     |     buildTypes.signingConfig.storePassword                |    签名密码（具体说明见下文“签名”）   |
-|    keyAlias       |    String     |     buildTypes.signingConfig.keyAlias                     |    别名（具体说明见下文“签名”）   |
-|    keyPassword    |    String     |     buildTypes.signingConfig.keyPassword                  |    别名密码（具体说明见下文“签名”） |
-|    channelFile    |    File       |     null                                                  |    多渠道打包设置，选择.txt文件，下载的jiagu包里有多渠道模板.txt  |
-|    inputFilePath  |    String     |     applicationVariants.outputs.outputFile                |    打包的apk路径   |
-|    outputFileDir  |    String     |     ${project.buildDir.getAbsolutePath()}\jiagu           |    加固后apk的输出路径，app\build\jiagu   |
-|    config         |    String     |     -crashlog -x86 -analyse                               |    加固配置，默认选择崩溃日志服务、支持x86架构设备、选择数据分析服务   |
-|    firApiToken    |    String     |     fir API Token                                         |    鼠标悬浮头像，出现API Token 按钮，点击   |
-|    firChangeLog   |    String     |     null                                                  |    更新说明   |
 
 **签名**
 
-插件模式使用 buildTypes 里面的签名配置
+插件使用 buildTypes 里面的签名配置
+
 ```
 android {
     ...
@@ -80,9 +60,20 @@ android {
 }
 ```
 
+或者使用名为release的签名配置
+
+```
+    signingConfigs {
+        release {
+            ...
+        }
+    }
+```
+
 **config**
 
 这个是360加固助手的配置加固可选项，高级加固选项需要会员 [前往](http://jiagu.360.cn/#/global/vip/packages)
+
 ```
  ----------------------可选增强服务-------------------------------
          [-crashlog]                             【崩溃日志分析】
@@ -102,28 +93,11 @@ android {
          [-so_private]                           【SO防盗用】
 ```
 
-### other
+## Use
 
-如果使用了ProductFlavors区分产品渠道，想在不同的flavor开启插件，可配置：
+在Android Studio的Gradle窗口app/Tasks中有一个jiagu目录。
 
-```
-    applicationVariants.all { variant ->
-        if (variant.flavorName == "apptest1") { // 渠道1：channel1
-            variant.ext.jiaguEnable = false
-            variant.ext.jiaguJiaguEnable = false
-            variant.ext.jiaguFirEnable = false
-        } else if (variant.flavorName == "apptest2") { // 渠道2：channel2
-            variant.ext.jiaguEnable = true
-            variant.ext.jiaguJiaguEnable = false
-            variant.ext.jiaguFirEnable = false
-        }
-    }
-```
+jiaGuApk开头是直接加固当前已有apk，jiaGuAssemble开头是运行assembleRelease/Debug之后进行加固。
 
-### tip
-
-- 插件会在执行assemble${variantName}前生成sJiaGu${variantName}方法
-- 插件会在Release编译打包的时候自动启动
-- 如果debugOn=true，插件会在debug编译时自动启动
-
+## [360加固助手](https://jiagu.360.cn/#/global/download)
 

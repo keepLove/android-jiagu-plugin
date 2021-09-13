@@ -1,4 +1,4 @@
-package com.s.android.plugin.jiagu
+package com.s.android.plugin.jiagu.utils
 
 class Logger {
 

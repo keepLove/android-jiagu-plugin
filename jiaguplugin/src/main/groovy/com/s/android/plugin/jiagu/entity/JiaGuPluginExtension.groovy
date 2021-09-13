@@ -1,4 +1,4 @@
-package com.s.android.plugin.jiagu
+package com.s.android.plugin.jiagu.entity
 
 import com.android.builder.model.SigningConfig
 import com.s.android.plugin.jiagu.utils.Utils
@@ -38,9 +38,9 @@ class JiaGuPluginExtension {
      */
     String config = null
     /**
-     * 控制台输出编码方式
+     * 控制台输出编码方式，默认GBK
      */
-    String charsetName = "UTF-8"
+    String charsetName = "GBK"
 
     void checkParams() {
         if (Utils.isEmpty(jiaGuDir)) {

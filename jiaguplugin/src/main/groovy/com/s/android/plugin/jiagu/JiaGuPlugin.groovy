@@ -2,6 +2,7 @@ package com.s.android.plugin.jiagu
 
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.api.ApplicationVariant
+import com.s.android.plugin.jiagu.entity.JiaGuPluginExtension
 import com.s.android.plugin.jiagu.utils.Utils
 import org.gradle.api.*
 
