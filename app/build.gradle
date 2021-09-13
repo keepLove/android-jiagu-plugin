@@ -45,23 +45,23 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-    flavorDimensions 'app', 'dev'
-    productFlavors {
-        apptest1 {
-            dimension = 'app'
-            applicationId = 'com.s.android.plugin.jiaguplugin.test1'
-        }
-        apptest2 {
-            dimension = 'app'
-            applicationId = 'com.s.android.plugin.jiaguplugin.test2'
-        }
-        devtest1 {
-            dimension = 'dev'
-        }
-        devtest2 {
-            dimension = 'dev'
-        }
-    }
+//    flavorDimensions 'app', 'dev'
+//    productFlavors {
+//        apptest1 {
+//            dimension = 'app'
+//            applicationId = 'com.s.android.plugin.jiaguplugin.test1'
+//        }
+//        apptest2 {
+//            dimension = 'app'
+//            applicationId = 'com.s.android.plugin.jiaguplugin.test2'
+//        }
+//        devtest1 {
+//            dimension = 'dev'
+//        }
+//        devtest2 {
+//            dimension = 'dev'
+//        }
+//    }
 //    applicationVariants.all { variant ->
 //        if (variant.flavorName == "apptest1") { // 渠道1：channel1
 //            variant.ext.jiaguEnable = false

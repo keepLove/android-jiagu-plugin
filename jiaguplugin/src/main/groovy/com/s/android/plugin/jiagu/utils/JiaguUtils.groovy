@@ -59,7 +59,7 @@ class JiaguUtils {
      * 2.导入签名信息
      */
     private static String importSign(JiaGuPluginExtension jiaGuExtension) {
-        if (!Utils.isBlank(jiaGuExtension.signingConfig)) {
+        if (jiaGuExtension.signingConfig != null) {
             commandExt += " -autosign "
             return ProcessUtils.exec(commandJiaGu + " -importsign ${jiaGuExtension.getSign()}")
         }
@@ -70,7 +70,7 @@ class JiaguUtils {
      * 3.导入渠道信息
      */
     private static String importMulPkg(JiaGuPluginExtension jiaGuExtension) {
-        if (!Utils.isBlank(jiaGuExtension.channelFile) && jiaGuExtension.channelFile.exists()) {
+        if (jiaGuExtension.channelFile != null && jiaGuExtension.channelFile.exists()) {
             commandExt += " -automulpkg "
             return ProcessUtils.exec(commandJiaGu + " -importmulpkg ${jiaGuExtension.channelFile}")
         }
