@@ -86,6 +86,7 @@ class JiaGuPlugin implements Plugin<Project> {
         return project.tasks.create("jiaGu${prefix}${name}${type}", JiaGuTask.class) {
             currentFlavorName = flavorName
             currentBuildType = buildType
+            isCheckExists = !prefix.equalsIgnoreCase("Assemble")
         }
     }
 

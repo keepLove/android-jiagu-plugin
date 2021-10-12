@@ -24,6 +24,12 @@ class JiaGuTask extends DefaultTask {
     @Input
     String currentBuildType
 
+    /**
+     * 是否验证存在加固apk包
+     */
+    @Input
+    boolean isCheckExists
+
     JiaGuTask() {
         group = "JiaGu"
         description = "360 jiagu plugin"
@@ -67,8 +73,14 @@ class JiaGuTask extends DefaultTask {
         String jiaGuName = "${apkName}_${versionName}_jiagu_sign.apk"
         File file = new File(jiaGuExtension.outputFileDir, jiaGuName)
         if (file.exists()) {
-            Logger.debug("${fileName}已经加固了")
-            return
+            if (isCheckExists) {
+                Logger.debug("${fileName} 已经加固了，请删除后重试")
+                return
+            } else {
+                Logger.debug("${fileName} 已经加固了，开始删除")
+                file.delete()
+                Logger.debug("${fileName} 已经删除")
+            }
         }
         JiaguUtils.jiagu(jiaGuExtension, output)
     }
