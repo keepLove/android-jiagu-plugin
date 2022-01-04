@@ -11,41 +11,41 @@ class JiaguUtils {
     static void jiagu(JiaGuPluginExtension jiaGuExtension, BaseVariantOutput variantOutput) {
         commandExt = ""
         commandJiaGu = "${jiaGuExtension.jiaGuDir}\\java\\bin\\java -jar ${jiaGuExtension.jiaGuDir}\\jiagu.jar "
-        // 登录
+        // 1，登录
         String result = login(jiaGuExtension)
-        if (result.contains("success")) {
-            Logger.debug("login success")
-            // 导入签名keystore信息
-            result = importSign(jiaGuExtension)
-            if (result.contains("succeed")) {
-                result = "导入签名 succeed"
-            }
+        if (!result.contains("success")) {
             Logger.debug(result)
-            // 导入渠道信息
-            Logger.debug(importMulPkg(jiaGuExtension))
-            // 配置加固服务
-            result = setConfig(jiaGuExtension)
-            if (result.contains("config saving succeed.")) {
-                def indexOf = result.indexOf("已选增强服务")
-                if (indexOf > -1) {
-                    result = result.substring(indexOf).trim()
-                } else {
-                    result = "已选增强服务：${jiaGuExtension.config}"
-                }
-            }
-            Logger.debug(result)
-            Logger.debug("加固中... " + variantOutput.outputFile.path)
-            // 加固
-            result = jiaguStart(jiaGuExtension, variantOutput)
-            if (result.contains("任务完成_已签名")) {
-                result = "任务完成_已签名"
-            }
-            Logger.debug(result)
-            Logger.debug("输出目录：${jiaGuExtension.outputFileDir}")
-        } else {
-            Logger.debug(result)
-            throw new RuntimeException("登录失败")
+            throw new RuntimeException("360登录失败")
         }
+        Logger.debug("360登录成功")
+        // 2，导入签名keystore信息
+        result = importSign(jiaGuExtension)
+        if (!result.contains("succeed")) {
+            Logger.debug(result)
+            throw new RuntimeException("导入签名keystore失败")
+        }
+        Logger.debug("导入签名成功")
+        // 3，导入渠道信息
+        Logger.debug(importMulPkg(jiaGuExtension))
+        // 4，配置加固服务
+        result = setConfig(jiaGuExtension)
+        if (result.contains("config saving succeed.")) {
+            def indexOf = result.indexOf("已选增强服务")
+            if (indexOf > -1) {
+                result = result.substring(indexOf).trim()
+            } else {
+                result = "已选增强服务：${jiaGuExtension.config}"
+            }
+        }
+        Logger.debug(result)
+        Logger.debug("加固中... " + variantOutput.outputFile.path)
+        // 5，加固
+        result = jiaguStart(jiaGuExtension, variantOutput)
+        if (result.contains("任务完成_已签名")) {
+            result = "任务完成_已签名"
+        }
+        Logger.debug(result)
+        Logger.debug("输出目录：${jiaGuExtension.outputFileDir}")
     }
 
     /**

@@ -1,15 +1,9 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
-//apply plugin: 'jiagu'
-//
-//jiagu {
-//    debug = true
-//    jiaGuDir = "D:\\file\\360jiagubao_windows_64\\jiagu"
-//    username = ""
-//    password = ""
-////    charsetName = "GBK"
-//}
+
+// 360加固插件 把jiagu.gradle.ignore复制一份，去掉.ignore后缀
+//apply from: 'jiagu.gradle'
 
 android {
     compileSdkVersion 30

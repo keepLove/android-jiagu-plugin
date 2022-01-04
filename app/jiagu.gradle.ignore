@@ -1,0 +1,9 @@
+apply plugin: 'jiagu'
+
+jiagu {
+    debug = false
+    jiaGuDir = "D:\\file\\360jiagubao_windows_64\\jiagu"
+    username = ""
+    password = ""
+    config = "-x86 -analyse -crashlog"
+}

@@ -7,8 +7,8 @@ buildscript {
         jiagu = [
                 groupId    : 'com.github.keepLove',
                 artifactId : 'android-jiagu-plugin',
-                versionCode: 22,
-                versionName: "2.2",
+                versionCode: 23,
+                versionName: "2.3",
         ]
 
     }
@@ -30,7 +30,8 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
-//        classpath 'com.github.keepLove:android-jiagu-plugin:2.2'
+        // 360加固
+//        classpath 'com.github.keepLove:android-jiagu-plugin:2.3'
     }
 }
 
