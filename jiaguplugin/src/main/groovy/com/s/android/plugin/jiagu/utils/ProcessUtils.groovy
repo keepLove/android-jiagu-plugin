@@ -12,7 +12,7 @@ class ProcessUtils {
      * @param command 命令
      * @return 结果
      */
-    static String exec(String command) throws InterruptedException {
+    static String exec(String command, File dir) throws InterruptedException {
         String returnString = ""
         Runtime runTime = Runtime.getRuntime()
         if (runTime == null) {
@@ -22,7 +22,7 @@ class ProcessUtils {
             if (debug) {
                 Logger.debug("命令行执行语句 => " + command)
             }
-            Process pro = runTime.exec(command)
+            Process pro = runTime.exec("cmd /C " + command, null, dir)
             returnString = Utils.readText(new InputStreamReader(pro.getInputStream(), charsetName))
             pro.destroy()
         } catch (IOException ex) {

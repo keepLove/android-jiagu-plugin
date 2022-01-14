@@ -7,10 +7,15 @@ class JiaguUtils {
 
     private static String commandJiaGu
     private static String commandExt = ""
+    private static File parentDir
 
     static void jiagu(JiaGuPluginExtension jiaGuExtension, BaseVariantOutput variantOutput) {
         commandExt = ""
-        commandJiaGu = "${jiaGuExtension.jiaGuDir}\\java\\bin\\java -jar ${jiaGuExtension.jiaGuDir}\\jiagu.jar "
+        parentDir = new File(jiaGuExtension.jiaGuDir)
+        if (!parentDir.exists()) {
+            throw new RuntimeException("加固文件不存在。${jiaGuExtension.jiaGuDir}")
+        }
+        commandJiaGu = "java\\bin\\java -jar jiagu.jar "
         // 1，登录
         String result = login(jiaGuExtension)
         if (!result.contains("success")) {
@@ -52,7 +57,7 @@ class JiaguUtils {
      * 1.加固登录
      */
     private static String login(JiaGuPluginExtension jiaGuExtension) {
-        return ProcessUtils.exec(commandJiaGu + " -login ${jiaGuExtension.username} ${jiaGuExtension.password}")
+        return ProcessUtils.exec(commandJiaGu + " -login ${jiaGuExtension.username} ${jiaGuExtension.password}", parentDir)
     }
 
     /**
@@ -61,7 +66,7 @@ class JiaguUtils {
     private static String importSign(JiaGuPluginExtension jiaGuExtension) {
         if (jiaGuExtension.signingConfig != null) {
             commandExt += " -autosign "
-            return ProcessUtils.exec(commandJiaGu + " -importsign ${jiaGuExtension.getSign()}")
+            return ProcessUtils.exec(commandJiaGu + " -importsign ${jiaGuExtension.getSign()}", parentDir)
         }
         return "未导入签名信息"
     }
@@ -72,7 +77,7 @@ class JiaguUtils {
     private static String importMulPkg(JiaGuPluginExtension jiaGuExtension) {
         if (jiaGuExtension.channelFile != null && jiaGuExtension.channelFile.exists()) {
             commandExt += " -automulpkg "
-            return ProcessUtils.exec(commandJiaGu + " -importmulpkg ${jiaGuExtension.channelFile}")
+            return ProcessUtils.exec(commandJiaGu + " -importmulpkg ${jiaGuExtension.channelFile}", parentDir)
         }
         return "未导入渠道信息"
     }
@@ -82,7 +87,7 @@ class JiaguUtils {
      */
     private static String setConfig(JiaGuPluginExtension jiaGuExtension) {
         // 配置加固服务
-        return ProcessUtils.exec(commandJiaGu + " -config ${jiaGuExtension.config}")
+        return ProcessUtils.exec(commandJiaGu + " -config ${jiaGuExtension.config}", parentDir)
     }
 
     /**
@@ -91,6 +96,6 @@ class JiaguUtils {
     private static String jiaguStart(JiaGuPluginExtension jiaGuExtension, BaseVariantOutput variantOutput) {
         // 应用加固
         String cmd = commandJiaGu + " -jiagu ${variantOutput.outputFile.absolutePath} ${jiaGuExtension.outputFileDir}"
-        return ProcessUtils.exec(cmd + commandExt)
+        return ProcessUtils.exec(cmd + commandExt, parentDir)
     }
 }
